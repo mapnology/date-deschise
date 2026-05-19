@@ -60,7 +60,7 @@ def init_db():
             m = re.match(r"SEC[TȚŢ]IUNEA\s+(\S+)\s*[-–]\s*(.+)", raw_sec, re.IGNORECASE)
             if m:
                 sec_cod = m.group(1).strip()
-                sec_den = m.group(2).strip()
+                sec_den = m.group(2).strip().rstrip(";").strip()
             else:
                 # fallback: folosim textul complet ca denumire, cod generat
                 sec_cod = raw_sec[:10]
