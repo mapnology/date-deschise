@@ -6,11 +6,16 @@ import os
 from contextlib import contextmanager
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 DB_PATH = os.getenv("DB_PATH", "caen.db")
+
+limiter = Limiter(key_func=get_remote_address)
 
 app = FastAPI(
     title="Romanian CAEN Codes API",
@@ -18,10 +23,15 @@ app = FastAPI(
     version="1.0.0",
 )
 
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+ALLOWED_METHODS = {"GET"}
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_methods=["GET"],
+    allow_methods=list(ALLOWED_METHODS),
     allow_headers=["*"],
 )
 
@@ -86,7 +96,8 @@ class SearchResponse(BaseModel):
     response_model=CAENEntry,
     summary="Cauta dupa cod CAEN exact (4 cifre)",
 )
-def get_by_code(cod: str):
+@limiter.limit("10/minute")
+def get_by_code(request: Request, cod: str):
     """
     Returneaza detalii complete (denumire, sectiune, diviziune, grupa)
     pentru un cod CAEN de 4 cifre.
@@ -107,7 +118,9 @@ def get_by_code(cod: str):
     response_model=SearchResponse,
     summary="Cauta coduri CAEN dupa cod sau denumire",
 )
+@limiter.limit("10/minute")
 def search(
+    request: Request,
     q: str = Query(..., min_length=1, description="Text de cautare (cod sau parte din denumire)"),
     limit: int = Query(50, ge=1, le=200, description="Numar maxim de rezultate"),
     offset: int = Query(0, ge=0, description="Paginare – pozitia de start"),
