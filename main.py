@@ -5,6 +5,7 @@ import sqlite3
 import os
 from contextlib import contextmanager
 from typing import Optional
+from fastapi.responses import RedirectResponse
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -91,6 +92,11 @@ class SearchResponse(BaseModel):
 # Endpoints
 # ---------------------------------------------------------------------------
 
+@app.get("/", include_in_schema=False)
+@limiter.limit("10/minute")
+def root(request: Request):
+    return RedirectResponse(url="/docs")
+
 @app.get(
     "/caen/{cod}",
     response_model=CAENEntry,
@@ -118,6 +124,7 @@ def get_by_code(request: Request, cod: str):
     response_model=SearchResponse,
     summary="Cauta coduri CAEN dupa cod sau denumire",
 )
+
 @limiter.limit("10/minute")
 def search(
     request: Request,
