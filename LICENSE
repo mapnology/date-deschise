@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2026 Matei Domnita
+Copyright (c) 2025 Matei Domnita
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +19,10 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+Data sources
+
+CAEN Rev. 3 full structure (official ONRC PDF):
+https://www.onrc.ro/documente/anunturi/CAEN-Rev.3_structura-completa.pdf
+
+The classification data used by this project is based on publicly available official Romanian CAEN classification datasets.
