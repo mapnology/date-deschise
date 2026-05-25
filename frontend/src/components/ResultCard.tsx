@@ -9,9 +9,9 @@ export function ResultCard({ entry }: Props) {
   const [copied, setCopied] = useState(false)
 
   function copy() {
-    navigator.clipboard.writeText(entry.cod_caen).then(() => {
+    navigator.clipboard.writeText(`${entry.cod_caen} - ${entry.denumire}`).then(() => {
       setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
+      setTimeout(() => setCopied(false), 2000)
     })
   }
 
@@ -31,7 +31,7 @@ export function ResultCard({ entry }: Props) {
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 6 9 17l-5-5" />
               </svg>
-              Copiat
+              Copiat!
             </>
           ) : (
             <>
