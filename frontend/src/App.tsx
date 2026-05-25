@@ -1,16 +1,45 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Header } from './components/Header'
-import { SearchBar } from './components/SearchBar'
+import { SearchBar, type SuggestionItem } from './components/SearchBar'
 import { ResultsList } from './components/ResultsList'
 import { ResultCard } from './components/ResultCard'
 import { useCAENSearch } from './hooks/useCAENSearch'
 import { useFavorites } from './hooks/useFavorites'
+import type { CAENEntry } from './types/caen'
+
+const MAX_SUGGESTIONS = 8
+const MAX_FAV_SUGGESTIONS = 5
 
 export default function App() {
   const [query, setQuery] = useState('')
   const [showFavorites, setShowFavorites] = useState(true)
   const { results, total, loading, error } = useCAENSearch(query)
   const { favorites, isFavorite, toggleFavorite } = useFavorites()
+
+  const suggestions = useMemo<SuggestionItem[]>(() => {
+    const trimmed = query.trim().toLowerCase()
+    if (!trimmed) return []
+
+    const favMatches = favorites
+      .filter(f =>
+        f.cod_caen.startsWith(trimmed) ||
+        f.denumire.toLowerCase().includes(trimmed),
+      )
+      .slice(0, MAX_FAV_SUGGESTIONS)
+      .map(e => ({ ...e, isFavorite: true }))
+
+    const favCodes = new Set(favMatches.map(f => f.cod_caen))
+    const otherMatches = results
+      .filter(r => !favCodes.has(r.cod_caen))
+      .slice(0, MAX_SUGGESTIONS - favMatches.length)
+      .map(e => ({ ...e, isFavorite: false }))
+
+    return [...favMatches, ...otherMatches]
+  }, [query, favorites, results])
+
+  function handleSelectSuggestion(entry: CAENEntry) {
+    setQuery(entry.cod_caen)
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -27,7 +56,12 @@ export default function App() {
         </div>
 
         <div className="mb-8 flex justify-center">
-          <SearchBar value={query} onChange={setQuery} />
+          <SearchBar
+            value={query}
+            onChange={setQuery}
+            suggestions={suggestions}
+            onSelectSuggestion={handleSelectSuggestion}
+          />
         </div>
 
         {favorites.length > 0 && (
