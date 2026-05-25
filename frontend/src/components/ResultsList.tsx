@@ -7,6 +7,8 @@ interface Props {
   loading: boolean
   error: string | null
   query: string
+  isFavorite?: (cod: string) => boolean
+  onToggleFavorite?: (entry: CAENEntry) => void
 }
 
 function SkeletonCard() {
@@ -25,7 +27,7 @@ function SkeletonCard() {
   )
 }
 
-export function ResultsList({ results, total, loading, error, query }: Props) {
+export function ResultsList({ results, total, loading, error, query, isFavorite, onToggleFavorite }: Props) {
   if (loading) {
     return (
       <div className="grid gap-4 sm:grid-cols-2">
@@ -61,7 +63,12 @@ export function ResultsList({ results, total, loading, error, query }: Props) {
       </p>
       <div className="grid gap-4 sm:grid-cols-2">
         {results.map(entry => (
-          <ResultCard key={entry.cod_caen} entry={entry} />
+          <ResultCard
+            key={entry.cod_caen}
+            entry={entry}
+            isFavorite={isFavorite?.(entry.cod_caen)}
+            onToggleFavorite={onToggleFavorite}
+          />
         ))}
       </div>
     </div>
