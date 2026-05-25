@@ -24,17 +24,17 @@ function ParamRow({ name, type, required, description }: { name: string; type: s
   )
 }
 
-const SEARCH_FETCH = `const res = await fetch('https://caen-api.ro/caen?q=cereale&limit=10');
+const SEARCH_FETCH = `const res = await fetch('https://caen-api.ro/api/caen?q=cereale&limit=10');
 const data = await res.json();
 // { total: 3, results: [...] }`
 
-const SEARCH_CURL = `curl "https://caen-api.ro/caen?q=cereale&limit=10"`
+const SEARCH_CURL = `curl "https://caen-api.ro/api/caen?q=cereale&limit=10"`
 
-const LOOKUP_FETCH = `const res = await fetch('https://caen-api.ro/caen/0111');
+const LOOKUP_FETCH = `const res = await fetch('https://caen-api.ro/api/caen/0111');
 const data = await res.json();
 // { cod_caen: "0111", denumire: "...", ... }`
 
-const LOOKUP_CURL = `curl "https://caen-api.ro/caen/0111"`
+const LOOKUP_CURL = `curl "https://caen-api.ro/api/caen/0111"`
 
 const SEARCH_RESPONSE = `{
   "total": 3,
@@ -75,7 +75,7 @@ export function DocsPage() {
         </p>
         <div className="mt-4 flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
           <span className="text-sm font-semibold text-blue-700">Base URL</span>
-          <code className="ml-2 font-mono text-sm text-blue-800">https://caen-api.ro</code>
+          <code className="ml-2 font-mono text-sm text-blue-800">https://caen-api.ro/api</code>
           <a
             href="https://caen-api.ro/docs"
             target="_blank"
