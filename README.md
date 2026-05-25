@@ -1,93 +1,76 @@
-# Romanian CAEN Codes API
+# CAEN Rev. 3 � Romanian Activity Codes Explorer
 
-REST API for Romanian CAEN Rev. 3 codes (NACE classification) built with FastAPI and SQLite.
+A React frontend for browsing and searching Romanian CAEN codes (Rev. 3 / NACE Rev. 2.1), backed by the [caen-api.ro](https://caen-api.ro) REST API.
 
-CAEN (Clasificarea Activităților din Economia Națională) — the Romanian classification of economic activities, equivalent to the European NACE Rev. 2 standard.
+## Features
 
-Data sources:
-- CAEN Rev. 3 full structure (PDF): https://www.onrc.ro/documente/anunturi/CAEN-Rev.3_structura-completa.pdf
-- ONRC CAEN index: https://www.onrc.ro/index.php/ro/caen-index
+- **Full-text search** � query by code or activity name with debounced live results
+- **Autocomplete suggestions** � inline dropdown showing favorites first, then API matches
+- **Favorites** � pin any code to localStorage for quick access across sessions
+- **Hierarchy display** � each result shows its section, division, and group
+- **Responsive UI** � built with Tailwind CSS v4, works on mobile and desktop
+- **Docs & About pages** � API documentation and project background included
 
----
+## Tech Stack
 
-## Project structure
+| Layer | Technology |
+|---|---|
+| Framework | React 19 + TypeScript |
+| Build tool | Vite 8 |
+| Styling | Tailwind CSS v4 |
+| Routing | React Router v7 |
+| API | [caen-api.ro](https://caen-api.ro) |
 
-```
-.
-├── caen_rev3_coduri_clase.csv          # Source data (651 CAEN classes)
-├── caen_rev3_coduri_grupa_diviziune.csv
-├── caen_rev3_ierarhic_diviziuni_grupe_clase.csv
-├── init_db.py                          # Builds caen.db from CSV
-├── main.py                             # FastAPI application
-├── scrape_to_text.py                   # Scraper used to collect the data
-├── CAEN.sql                            # Legacy PostgreSQL flat table
-├── requirements.txt
-├── Dockerfile
-└── docker-compose.yml
-```
+## Getting Started
 
-## Database schema
-
-SQLite database with four related tables:
-
-```
-sectiuni  (A, B, C…)
-  └── diviziuni  (01, 02…)
-        └── grupe  (011, 012…)
-              └── clase  (0111, 0112…)  ← CAEN 4-digit codes
-```
-
-## API endpoints
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/caen/{cod}` | Exact 4-digit CAEN code lookup |
-| `GET` | `/caen?q={text}` | Search by code or name (supports partial match) |
-| `GET` | `/docs` | Swagger UI |
-
-### Example responses
-
-**GET /caen/0111**
-```json
-{
-  "cod_caen": "0111",
-  "denumire": "Cultivarea cerealelor (excluzând orezul), plantelor leguminoase şi a plantelor oleaginoase",
-  "sectiune_cod": "A",
-  "sectiune": "AGRICULTURĂ, SILVICULTURĂ ŞI PESCUIT",
-  "diviziune_cod": "01",
-  "diviziune": "Agricultură, vânătoare şi servicii anexe",
-  "grupa_cod": "011",
-  "grupa": "Cultivarea plantelor nepermanente"
-}
-```
-
-**GET /caen?q=cereale&limit=10&offset=0**
-```json
-{
-  "total": 2,
-  "results": [...]
-}
-```
-
-## Running locally
+**Prerequisites:** Node.js 18+
 
 ```bash
-python -m venv .venv
-.venv\Scripts\activate        # Windows
-pip install -r requirements.txt
+# Install dependencies
+npm install
 
-python init_db.py             # creates caen.db
-uvicorn main:app --reload
+# Start the dev server
+npm run dev
 ```
 
-Open http://localhost:8000/docs for the interactive API docs.
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-## Docker
+### Other Commands
 
 ```bash
-docker compose up -d --build
+npm run build    # Type-check and build for production
+npm run preview  # Preview the production build locally
+npm run lint     # Run ESLint
 ```
 
-The API will be available at http://localhost:8000.
+## Project Structure
 
-The SQLite database is built inside the container at image build time — no external database service required.
+```
+src/
++-- components/       # Shared UI components (SearchBar, ResultCard, Navbar, �)
++-- hooks/
+�   +-- useCAENSearch.ts   # Debounced search hook with abort-controller support
+�   +-- useFavorites.ts    # LocalStorage-backed favorites state
++-- pages/            # Route-level components (Home, About, Docs)
++-- services/
+�   +-- caenApi.ts    # Typed fetch wrappers for caen-api.ro
++-- types/
+    +-- caen.ts       # CAENEntry and SearchResponse interfaces
+```
+
+## API
+
+All data is fetched from `https://caen-api.ro`.
+
+| Endpoint | Description |
+|---|---|
+| `GET /caen?q=&limit=&offset=` | Search codes by keyword |
+| `GET /caen/:code` | Fetch a single entry by its 4-digit code |
+
+## About
+
+Developed by [Mapnology SRL](https://mapnology.eu). Data sourced from INS (Institutul Na?ional de Statistica) and ONRC official classifications.
+
+## License
+
+See [LICENSE](LICENSE).
