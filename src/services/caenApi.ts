@@ -1,6 +1,6 @@
 import type { CAENEntry, SearchResponse } from '../types/caen'
 
-const BASE_URL = 'https://caen-api.ro'
+const BASE_URL = import.meta.env.VITE_API_BASE_URL as string
 
 export async function searchCAEN(
   query: string,
