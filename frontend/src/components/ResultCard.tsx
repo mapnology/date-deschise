@@ -16,15 +16,15 @@ export function ResultCard({ entry }: Props) {
   }
 
   return (
-    <article className="flex flex-col gap-3 rounded-xl border border-gray-100 bg-white p-5 shadow-sm transition hover:border-gray-200 hover:shadow-md dark:border-gray-800 dark:bg-gray-900 dark:hover:border-gray-700">
+    <article className="flex flex-col gap-3 rounded-xl border border-gray-100 bg-white p-5 shadow-sm transition hover:border-gray-200 hover:shadow-md">
       <div className="flex items-start justify-between gap-4">
-        <span className="shrink-0 rounded-lg bg-blue-50 px-2.5 py-1 font-mono text-sm font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+        <span className="shrink-0 rounded-lg bg-blue-50 px-2.5 py-1 font-mono text-sm font-semibold text-blue-700">
           {entry.cod_caen}
         </span>
         <button
           onClick={copy}
           title="Copiază codul CAEN"
-          className="shrink-0 flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+          className="shrink-0 flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
         >
           {copied ? (
             <>
@@ -45,21 +45,21 @@ export function ResultCard({ entry }: Props) {
         </button>
       </div>
 
-      <h2 className="text-base font-semibold leading-snug text-gray-900 dark:text-gray-100">
+      <h2 className="text-base font-semibold leading-snug text-gray-900">
         {entry.denumire}
       </h2>
 
-      <dl className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-500 dark:text-gray-400">
+      <dl className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-500">
         <div className="flex gap-1">
-          <dt className="font-medium text-gray-400 dark:text-gray-500">Secțiune</dt>
+          <dt className="font-medium text-gray-400">Secțiune</dt>
           <dd>{entry.sectiune_cod} – {entry.sectiune}</dd>
         </div>
         <div className="flex gap-1">
-          <dt className="font-medium text-gray-400 dark:text-gray-500">Diviziune</dt>
+          <dt className="font-medium text-gray-400">Diviziune</dt>
           <dd>{entry.diviziune_cod} – {entry.diviziune}</dd>
         </div>
         <div className="flex gap-1">
-          <dt className="font-medium text-gray-400 dark:text-gray-500">Grupă</dt>
+          <dt className="font-medium text-gray-400">Grupă</dt>
           <dd>{entry.grupa_cod} – {entry.grupa}</dd>
         </div>
       </dl>

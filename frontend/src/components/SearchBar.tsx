@@ -26,7 +26,7 @@ export function SearchBar({ value, onChange }: Props) {
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder="Caută cod CAEN sau denumire activitate…"
-        className="w-full rounded-xl border border-gray-200 bg-white py-3.5 pl-11 pr-10 text-base text-gray-900 placeholder-gray-400 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-500 dark:focus:border-blue-400 dark:focus:ring-blue-400/20"
+        className="w-full rounded-xl border border-gray-200 bg-white py-3.5 pl-11 pr-10 text-base text-gray-900 placeholder-gray-400 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
         autoComplete="off"
         spellCheck={false}
       />
@@ -34,7 +34,7 @@ export function SearchBar({ value, onChange }: Props) {
         <button
           onClick={() => onChange('')}
           aria-label="Clear search"
-          className="absolute inset-y-0 right-3 flex items-center p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          className="absolute inset-y-0 right-3 flex items-center p-1 text-gray-400 hover:text-gray-600"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M18 6 6 18M6 6l12 12" />
