@@ -214,10 +214,10 @@ export function HomePage() {
         <div className="mx-auto max-w-2xl">
           <span className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
             <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
-            Mapnology Open Data
+            Date Deschise
           </span>
           <h1 className="mb-4 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-            Mapnology Open Data Portal
+            Date Deschise România
           </h1>
           <p className="text-lg text-gray-500">
             API-uri gratuite cu date publice din România

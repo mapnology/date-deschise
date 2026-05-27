@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
+import logo from '../assets/logo.png'
 
 const links = [
   { to: '/', label: 'Portal', exact: true },
@@ -38,9 +39,9 @@ export function Navbar() {
         {/* Brand */}
         <NavLink
           to="/"
-          className="text-base font-bold tracking-tight text-gray-900 hover:text-blue-600 transition-colors"
+          className="flex items-center hover:opacity-80 transition-opacity"
         >
-          Date Deschise<span className="text-blue-600">.ro</span>
+          <img src={logo} alt="Date Deschise România" className="h-8 w-auto" />
         </NavLink>
 
         {/* Desktop links */}
