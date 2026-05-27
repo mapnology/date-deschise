@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 
 const links = [
-  { to: '/', label: 'Acasă', exact: true },
+  { to: '/', label: 'Portal', exact: true },
+  { to: '/caen', label: 'CAEN Rev. 3', exact: false },
   { to: '/documentatie', label: 'Documentație API', exact: false },
   { to: '/despre', label: 'Despre', exact: false },
 ]
