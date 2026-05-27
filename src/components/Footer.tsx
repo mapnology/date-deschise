@@ -1,11 +1,29 @@
 export function Footer() {
   return (
     <footer className="mt-auto border-t border-gray-100 px-6 py-10 text-sm text-gray-500">
+      {/* Slogan banner */}
+      <div className="mx-auto mb-8 max-w-4xl text-center">
+        <p className="text-base font-medium text-gray-700">
+          Datele publice din România, transformate în API-uri moderne pentru developeri
+        </p>
+        <p className="mt-1.5 text-xs text-gray-400">
+          Proiect independent, open-source — contribuie pe{' '}
+          <a
+            href="https://github.com/mapnology/caen-api"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2 hover:text-gray-600"
+          >
+            GitHub
+          </a>
+        </p>
+      </div>
+
       <div className="mx-auto grid max-w-4xl gap-8 sm:grid-cols-3">
         <div>
           <h3 className="mb-2 font-semibold text-gray-700">Despre</h3>
           <p className="leading-relaxed">
-            Proiect dezvoltat de{' '}
+            Proiect independent dezvoltat de{' '}
             <a
               href="https://mapnology.eu"
               target="_blank"
@@ -14,7 +32,7 @@ export function Footer() {
             >
               Mapnology SRL
             </a>{' '}
-            pentru căutarea codurilor CAEN Rev. 3.
+            pentru căutarea codurilor CAEN Rev. 3. Cod sursă disponibil public.
           </p>
         </div>
         <div>
