@@ -44,10 +44,10 @@ export function HomePage() {
     <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
       <div className="mb-10 text-center">
         <h1 className="mb-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-          Coduri CAEN Rev. 3
+          Date Deschise România
         </h1>
         <p className="text-gray-500">
-          Caută orice cod sau activitate din clasificarea CAEN Rev. 3
+          Explorează datele publice din România: coduri CAEN, firme și alte seturi de date guvernamentale
         </p>
       </div>
 

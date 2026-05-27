@@ -39,7 +39,7 @@ export function Navbar() {
           to="/"
           className="text-base font-bold tracking-tight text-gray-900 hover:text-blue-600 transition-colors"
         >
-          CAEN-API<span className="text-blue-600">.ro</span>
+          Date Deschise<span className="text-blue-600">.ro</span>
         </NavLink>
 
         {/* Desktop links */}

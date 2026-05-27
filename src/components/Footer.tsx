@@ -4,12 +4,12 @@ export function Footer() {
       {/* Slogan banner */}
       <div className="mx-auto mb-8 max-w-4xl text-center">
         <p className="text-base font-medium text-gray-700">
-          Datele publice din România, transformate în API-uri moderne pentru developeri
+          Date guvernamentale din România, transformate în API-uri moderne pentru developeri
         </p>
         <p className="mt-1.5 text-xs text-gray-400">
           Proiect independent, open-source — contribuie pe{' '}
           <a
-            href="https://github.com/mapnology/caen-api"
+            href="https://github.com/mapnology/date-deschise"
             target="_blank"
             rel="noopener noreferrer"
             className="underline underline-offset-2 hover:text-gray-600"
@@ -32,7 +32,7 @@ export function Footer() {
             >
               Mapnology SRL
             </a>{' '}
-            pentru căutarea codurilor CAEN Rev. 3. Cod sursă disponibil public.
+            pentru accesarea datelor publice din România printr-un API modern. Cod sursă disponibil public.
           </p>
         </div>
         <div>
@@ -61,8 +61,8 @@ export function Footer() {
         <div>
           <h3 className="mb-2 font-semibold text-gray-700">Sursă</h3>
           <p className="leading-relaxed">
-            Datele provin de la INS și ONRC și au caracter pur informativ. Pentru uz
-            oficial, consultați sursele oficiale.
+            Datele provin din surse oficiale românești (INS, ONRC, data.gov.ro) și au caracter pur informativ. Pentru uz
+            oficial, consultați sursele originale.
           </p>
         </div>
       </div>

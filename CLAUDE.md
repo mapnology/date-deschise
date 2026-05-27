@@ -1,4 +1,4 @@
-# caen-web
+# date-deschise
 
 Frontend web application for the CAEN data project. Built with React 19, Vite 8, Tailwind CSS v4, and TypeScript 6.
 

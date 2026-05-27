@@ -5,7 +5,7 @@ export function AboutPage() {
         Despre proiect
       </h1>
       <p className="mb-10 text-gray-500">
-        Informații despre această platformă, sursa datelor și echipa din spate.
+        Informații despre această platformă, sursele de date utilizate și echipa din spate.
       </p>
 
       <div className="space-y-10">
@@ -23,8 +23,8 @@ export function AboutPage() {
               Mapnology SRL
             </a>
             , companie specializată în inginerie software și managementul datelor. Ne concentrăm
-            pe construirea de soluții digitale clare, accesibile și scalabile pentru mediul de
-            afaceri românesc.
+            pe transformarea datelor publice guvernamentale în API-uri moderne, accesibile și scalabile
+            pentru developeri și aplicații din mediul de afaceri românesc.
           </p>
         </section>
 
@@ -48,7 +48,8 @@ export function AboutPage() {
         <section className="rounded-2xl border border-gray-100 bg-white p-7 shadow-sm">
           <h2 className="mb-3 text-lg font-bold text-gray-900">Sursa datelor</h2>
           <p className="mb-4 leading-relaxed text-gray-600">
-            Datele utilizate în această platformă provin din surse oficiale românești:
+            Datele utilizate în această platformă provin din surse oficiale românești. Pe măsură
+            ce platforma se extinde, vor fi integrate noi seturi de date guvernamentale:
           </p>
           <ul className="mb-4 space-y-2 text-gray-600">
             <li className="flex items-start gap-2">
@@ -69,7 +70,7 @@ export function AboutPage() {
           </ul>
           <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-700">
             Datele au caracter pur informativ. Pentru uz juridic sau oficial, vă rugăm să
-            consultați sursele oficiale INS și ONRC.
+            consultați sursele originale (INS, ONRC, data.gov.ro).
           </div>
         </section>
 

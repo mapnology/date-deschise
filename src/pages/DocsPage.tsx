@@ -71,7 +71,8 @@ export function DocsPage() {
           Documentație API
         </h1>
         <p className="text-gray-500">
-          API REST gratuit pentru căutarea codurilor CAEN Rev. 3. Toate endpoint-urile returnează JSON.
+          API-uri REST gratuite pentru date publice din România. Toate endpoint-urile returnează JSON.
+          Momentan disponibil: <strong className="text-gray-700">CAEN Rev. 3</strong>. Noi seturi de date vor fi adăugate.
         </p>
         <div className="mt-4 flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
           <span className="text-sm font-semibold text-blue-700">Base URL</span>
