@@ -7,7 +7,7 @@ This project is actively developed using multiple AI tools (Claude Code, Cursor,
 - **Leave No Trace:** Do not leave behind commented-out dead code, temporary debugging logs (`console.log`), or AI-specific comments like `// Written by Cursor`.
 - **Imports:** Keep imports organized. Remove unused imports immediately.
 
-## 2. Technical Stack Boundaries (caen-web)
+## 2. Technical Stack Boundaries (date-deschise)
 - This is a decoupled frontend repository utilizing **React, Vite, and Tailwind CSS**.
 - The API is an external, online service (CAEN API). Do not attempt to run Python or write backend logic within this repository scope.
 - State management relies on standard React hooks (`useState`, `useContext`). Do not introduce third-party state managers (Redux, Zustand) without confirmation.
