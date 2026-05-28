@@ -13,3 +13,18 @@ export interface SearchResponse {
   total: number
   results: CAENEntry[]
 }
+
+export interface Section {
+  cod: string
+  denumire: string
+}
+
+export interface Division {
+  cod: string
+  denumire: string
+}
+
+export interface Group {
+  cod: string
+  denumire: string
+}
