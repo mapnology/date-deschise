@@ -197,7 +197,7 @@ export function HierarchyExplorer({ isFavorite, onToggleFavorite }: Props) {
               items.data.length === 0 ? <EmptyState /> : (
                 <ul className="space-y-1.5">
                   {items.data.map(s => (
-                    <li key={s.id}>
+                    <li key={s.cod}>
                       <DrillRow cod={s.cod} denumire={s.denumire} kind="sections" onClick={() => drillInto(s, 'section')} />
                     </li>
                   ))}
@@ -209,7 +209,7 @@ export function HierarchyExplorer({ isFavorite, onToggleFavorite }: Props) {
               items.data.length === 0 ? <EmptyState /> : (
                 <ul className="space-y-1.5">
                   {items.data.map(d => (
-                    <li key={d.id}>
+                    <li key={d.cod}>
                       <DrillRow cod={d.cod} denumire={d.denumire} kind="divisions" onClick={() => drillInto(d, 'division')} />
                     </li>
                   ))}
@@ -221,7 +221,7 @@ export function HierarchyExplorer({ isFavorite, onToggleFavorite }: Props) {
               items.data.length === 0 ? <EmptyState /> : (
                 <ul className="space-y-1.5">
                   {items.data.map(g => (
-                    <li key={g.id}>
+                    <li key={g.cod}>
                       <DrillRow cod={g.cod} denumire={g.denumire} kind="groups" onClick={() => drillInto(g, 'group')} />
                     </li>
                   ))}
