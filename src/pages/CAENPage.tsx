@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { SearchBar, type SuggestionItem } from '../components/SearchBar'
 import { ResultsList } from '../components/ResultsList'
 import { ResultCard } from '../components/ResultCard'
+import { HierarchyExplorer } from '../components/HierarchyExplorer'
 import { useCAENSearch } from '../hooks/useCAENSearch'
 import { useFavorites } from '../hooks/useFavorites'
 import type { CAENEntry } from '../types/caen'
@@ -14,6 +15,7 @@ export function CAENPage() {
   const [showFavorites, setShowFavorites] = useState(true)
   const { results, total, loading, error } = useCAENSearch(query)
   const { favorites, isFavorite, toggleFavorite } = useFavorites()
+  const isSearchActive = query.trim().length > 0
 
   const suggestions = useMemo<SuggestionItem[]>(() => {
     const trimmed = query.trim().toLowerCase()
@@ -47,7 +49,7 @@ export function CAENPage() {
           Coduri CAEN Rev. 3
         </h1>
         <p className="text-gray-500">
-          Caută orice cod sau activitate din clasificarea CAEN Rev. 3
+          Caută orice cod sau explorează ierarhia completă a clasificării CAEN Rev. 3
         </p>
       </div>
 
@@ -60,7 +62,8 @@ export function CAENPage() {
         />
       </div>
 
-      {favorites.length > 0 && (
+      {/* Favorites — only when not searching */}
+      {!isSearchActive && favorites.length > 0 && (
         <section className="mb-10">
           <button
             onClick={() => setShowFavorites(v => !v)}
@@ -103,15 +106,26 @@ export function CAENPage() {
         </section>
       )}
 
-      <ResultsList
-        results={results}
-        total={total}
-        loading={loading}
-        error={error}
-        query={query}
-        isFavorite={isFavorite}
-        onToggleFavorite={toggleFavorite}
-      />
+      {/* Search results */}
+      {isSearchActive && (
+        <ResultsList
+          results={results}
+          total={total}
+          loading={loading}
+          error={error}
+          query={query}
+          isFavorite={isFavorite}
+          onToggleFavorite={toggleFavorite}
+        />
+      )}
+
+      {/* Hierarchy explorer — kept mounted to preserve navigation state */}
+      <div className={isSearchActive ? 'hidden' : ''}>
+        <HierarchyExplorer
+          isFavorite={isFavorite}
+          onToggleFavorite={toggleFavorite}
+        />
+      </div>
     </main>
   )
 }
