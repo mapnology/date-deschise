@@ -39,7 +39,7 @@ export function SirutaPage() {
   }, [query, favorites, results])
 
   function handleSelectSuggestion(entry: LocalitateEntry) {
-    setQuery(String(entry.cod_siruta))
+    setQuery(entry.denumire)
   }
 
   return (
