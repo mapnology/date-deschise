@@ -1,17 +1,17 @@
 import { useState } from 'react'
-import type { CAENEntry } from '../types/caen'
+import type { LocalitateEntry } from '../types/siruta'
 
 interface Props {
-  entry: CAENEntry
+  entry: LocalitateEntry
   isFavorite?: boolean
-  onToggleFavorite?: (entry: CAENEntry) => void
+  onToggleFavorite?: (entry: LocalitateEntry) => void
 }
 
-export function ResultCard({ entry, isFavorite = false, onToggleFavorite }: Props) {
+export function SirutaResultCard({ entry, isFavorite = false, onToggleFavorite }: Props) {
   const [copied, setCopied] = useState(false)
 
   function copy() {
-    navigator.clipboard.writeText(`${entry.cod_caen} - ${entry.denumire}`).then(() => {
+    navigator.clipboard.writeText(`${entry.cod_siruta} - ${entry.denumire}`).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     })
@@ -20,8 +20,8 @@ export function ResultCard({ entry, isFavorite = false, onToggleFavorite }: Prop
   return (
     <article className="flex flex-col gap-3 rounded-xl border border-gray-100 bg-white p-5 shadow-sm transition hover:border-gray-200 hover:shadow-md">
       <div className="flex items-start justify-between gap-2">
-        <span className="shrink-0 rounded-lg bg-blue-50 px-2.5 py-1 font-mono text-sm font-semibold text-blue-700">
-          {entry.cod_caen}
+        <span className="shrink-0 rounded-lg bg-emerald-50 px-2.5 py-1 font-mono text-sm font-semibold text-emerald-700">
+          {entry.cod_siruta}
         </span>
         <div className="flex items-center gap-1">
           {onToggleFavorite && (
@@ -48,7 +48,7 @@ export function ResultCard({ entry, isFavorite = false, onToggleFavorite }: Prop
           )}
           <button
             onClick={copy}
-            title="Copiază codul CAEN"
+            title="Copiază codul SIRUTA"
             className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-gray-400 transition hover:bg-gray-100 hover:text-gray-700"
           >
             {copied ? (
@@ -77,16 +77,12 @@ export function ResultCard({ entry, isFavorite = false, onToggleFavorite }: Prop
 
       <dl className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-500">
         <div className="flex gap-1">
-          <dt className="font-medium text-gray-400">Secțiune</dt>
-          <dd>{entry.sectiune_cod} – {entry.sectiune}</dd>
+          <dt className="font-medium text-gray-400">Tip</dt>
+          <dd>{entry.tip_abrev} – {entry.tip_denumire}</dd>
         </div>
         <div className="flex gap-1">
-          <dt className="font-medium text-gray-400">Diviziune</dt>
-          <dd>{entry.diviziune_cod} – {entry.diviziune}</dd>
-        </div>
-        <div className="flex gap-1">
-          <dt className="font-medium text-gray-400">Grupă</dt>
-          <dd>{entry.grupa_cod} – {entry.grupa}</dd>
+          <dt className="font-medium text-gray-400">Județ</dt>
+          <dd>{entry.judet_denumire}</dd>
         </div>
       </dl>
     </article>

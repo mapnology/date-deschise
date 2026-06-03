@@ -1,60 +1,60 @@
 import { useState, useMemo } from 'react'
-import { CAENSearchBar, type CAENSuggestionItem } from '../components/CAENSearchBar'
-import { CAENResultsList } from '../components/CAENResultsList'
-import { CAENResultCard } from '../components/CAENResultCard'
-import { CAENHierarchyExplorer } from '../components/CAENHierarchyExplorer'
-import { useCAENSearch } from '../hooks/useCAENSearch'
-import { useCAENFavorites } from '../hooks/useCAENFavorites'
-import type { CAENEntry } from '../types/caen'
+import { SirutaSearchBar, type SirutaSuggestionItem } from '../components/SirutaSearchBar'
+import { SirutaResultsList } from '../components/SirutaResultsList'
+import { SirutaResultCard } from '../components/SirutaResultCard'
+import { SirutaHierarchyExplorer } from '../components/SirutaHierarchyExplorer'
+import { useSirutaSearch } from '../hooks/useSirutaSearch'
+import { useSirutaFavorites } from '../hooks/useSirutaFavorites'
+import type { LocalitateEntry } from '../types/siruta'
 
 const MAX_SUGGESTIONS = 8
 const MAX_FAV_SUGGESTIONS = 5
 
-export function CAENPage() {
+export function SirutaPage() {
   const [query, setQuery] = useState('')
   const [showFavorites, setShowFavorites] = useState(true)
-  const { results, total, loading, error } = useCAENSearch(query)
-  const { favorites, isFavorite, toggleFavorite } = useCAENFavorites()
-  const isSearchActive = query.trim().length > 0
+  const { results, total, loading, error } = useSirutaSearch(query)
+  const { favorites, isFavorite, toggleFavorite } = useSirutaFavorites()
+  const isSearchActive = query.trim().length >= 2
 
-  const suggestions = useMemo<CAENSuggestionItem[]>(() => {
+  const suggestions = useMemo<SirutaSuggestionItem[]>(() => {
     const trimmed = query.trim().toLowerCase()
-    if (!trimmed) return []
+    if (trimmed.length < 2) return []
 
     const favMatches = favorites
       .filter(f =>
-        f.cod_caen.startsWith(trimmed) ||
+        String(f.cod_siruta).startsWith(trimmed) ||
         f.denumire.toLowerCase().includes(trimmed),
       )
       .slice(0, MAX_FAV_SUGGESTIONS)
       .map(e => ({ ...e, isFavorite: true }))
 
-    const favCodes = new Set(favMatches.map(f => f.cod_caen))
+    const favCodes = new Set(favMatches.map(f => f.cod_siruta))
     const otherMatches = results
-      .filter(r => !favCodes.has(r.cod_caen))
+      .filter(r => !favCodes.has(r.cod_siruta))
       .slice(0, MAX_SUGGESTIONS - favMatches.length)
       .map(e => ({ ...e, isFavorite: false }))
 
     return [...favMatches, ...otherMatches]
   }, [query, favorites, results])
 
-  function handleSelectSuggestion(entry: CAENEntry) {
-    setQuery(entry.cod_caen)
+  function handleSelectSuggestion(entry: LocalitateEntry) {
+    setQuery(entry.denumire)
   }
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
       <div className="mb-10 text-center">
         <h1 className="mb-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-          Coduri CAEN Rev. 3
+          Coduri SIRUTA
         </h1>
         <p className="text-gray-500">
-          Caută orice cod sau explorează ierarhia completă a clasificării CAEN Rev. 3
+          Caută orice localitate sau explorează ierarhia administrativă după județ
         </p>
       </div>
 
       <div className="mb-8 flex justify-center">
-        <CAENSearchBar
+        <SirutaSearchBar
           value={query}
           onChange={setQuery}
           suggestions={suggestions}
@@ -94,8 +94,8 @@ export function CAENPage() {
           {showFavorites && (
             <div className="grid gap-4 sm:grid-cols-2">
               {favorites.map(entry => (
-                <CAENResultCard
-                  key={entry.cod_caen}
+                <SirutaResultCard
+                  key={entry.cod_siruta}
                   entry={entry}
                   isFavorite
                   onToggleFavorite={toggleFavorite}
@@ -108,7 +108,7 @@ export function CAENPage() {
 
       {/* Search results */}
       {isSearchActive && (
-        <CAENResultsList
+        <SirutaResultsList
           results={results}
           total={total}
           loading={loading}
@@ -121,7 +121,7 @@ export function CAENPage() {
 
       {/* Hierarchy explorer — kept mounted to preserve navigation state */}
       <div className={isSearchActive ? 'hidden' : ''}>
-        <CAENHierarchyExplorer
+        <SirutaHierarchyExplorer
           isFavorite={isFavorite}
           onToggleFavorite={toggleFavorite}
         />

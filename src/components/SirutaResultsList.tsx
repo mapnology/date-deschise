@@ -1,33 +1,33 @@
-import type { CAENEntry } from '../types/caen'
-import { ResultCard } from './ResultCard'
+import type { LocalitateEntry } from '../types/siruta'
+import { SirutaResultCard } from './SirutaResultCard'
 
 interface Props {
-  results: CAENEntry[]
+  results: LocalitateEntry[]
   total: number
   loading: boolean
   error: string | null
   query: string
-  isFavorite?: (cod: string) => boolean
-  onToggleFavorite?: (entry: CAENEntry) => void
+  isFavorite?: (cod: number) => boolean
+  onToggleFavorite?: (entry: LocalitateEntry) => void
 }
 
 function SkeletonCard() {
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-gray-100 bg-white p-5 shadow-sm animate-pulse">
       <div className="flex items-start justify-between gap-4">
-        <div className="h-7 w-16 rounded-lg bg-gray-100" />
+        <div className="h-7 w-20 rounded-lg bg-gray-100" />
         <div className="h-7 w-20 rounded-lg bg-gray-100" />
       </div>
       <div className="h-5 w-3/4 rounded bg-gray-100" />
       <div className="flex gap-4">
-        <div className="h-4 w-32 rounded bg-gray-100" />
-        <div className="h-4 w-40 rounded bg-gray-100" />
+        <div className="h-4 w-24 rounded bg-gray-100" />
+        <div className="h-4 w-36 rounded bg-gray-100" />
       </div>
     </div>
   )
 }
 
-export function ResultsList({ results, total, loading, error, query, isFavorite, onToggleFavorite }: Props) {
+export function SirutaResultsList({ results, total, loading, error, query, isFavorite, onToggleFavorite }: Props) {
   if (loading) {
     return (
       <div className="grid gap-4 sm:grid-cols-2">
@@ -63,10 +63,10 @@ export function ResultsList({ results, total, loading, error, query, isFavorite,
       </p>
       <div className="grid gap-4 sm:grid-cols-2">
         {results.map(entry => (
-          <ResultCard
-            key={entry.cod_caen}
+          <SirutaResultCard
+            key={entry.cod_siruta}
             entry={entry}
-            isFavorite={isFavorite?.(entry.cod_caen)}
+            isFavorite={isFavorite?.(entry.cod_siruta)}
             onToggleFavorite={onToggleFavorite}
           />
         ))}

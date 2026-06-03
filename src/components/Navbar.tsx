@@ -5,6 +5,7 @@ import logo from '../assets/logo.png'
 const links = [
   { to: '/', label: 'Portal', exact: true },
   { to: '/caen', label: 'CAEN Rev. 3', exact: false },
+  { to: '/siruta', label: 'SIRUTA', exact: false },
   { to: '/documentatie', label: 'Documentație API', exact: false },
   { to: '/despre', label: 'Despre', exact: false },
 ]

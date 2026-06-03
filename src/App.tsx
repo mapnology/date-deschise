@@ -4,12 +4,14 @@ import { Navbar } from './components/Navbar'
 import { Footer } from './components/Footer'
 import { HomePage } from './pages/HomePage'
 import { CAENPage } from './pages/CAENPage'
+import { SirutaPage } from './pages/SirutaPage'
 import { DocsPage } from './pages/DocsPage'
 import { AboutPage } from './pages/AboutPage'
 
 const PAGE_TITLES: Record<string, string> = {
   '/': 'Date Deschise',
   '/caen': 'Coduri CAEN Rev. 3',
+  '/siruta': 'Coduri SIRUTA',
   '/documentatie': 'Documentație API',
   '/despre': 'Despre proiect',
 }
@@ -33,6 +35,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/caen" element={<CAENPage />} />
+            <Route path="/siruta" element={<SirutaPage />} />
             <Route path="/documentatie" element={<DocsPage />} />
             <Route path="/despre" element={<AboutPage />} />
           </Routes>

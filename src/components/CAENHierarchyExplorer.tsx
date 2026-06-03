@@ -1,6 +1,6 @@
 import { Fragment, useState, useEffect } from 'react'
 import { getSectiuni, getDiviziuni, getGrupe, getClase } from '../services/caenApi'
-import { ResultCard } from './ResultCard'
+import { CAENResultCard } from './CAENResultCard'
 import type { CAENEntry, Section, Division, Group } from '../types/caen'
 
 interface PathItem {
@@ -94,7 +94,7 @@ function DrillRow({
   )
 }
 
-export function HierarchyExplorer({ isFavorite, onToggleFavorite }: Props) {
+export function CAENHierarchyExplorer({ isFavorite, onToggleFavorite }: Props) {
   const [path, setPath] = useState<PathItem[]>([])
   const [items, setItems] = useState<ItemsState | null>(null)
   const [loading, setLoading] = useState(false)
@@ -235,7 +235,7 @@ export function HierarchyExplorer({ isFavorite, onToggleFavorite }: Props) {
                 : (
                   <div className="grid gap-4 sm:grid-cols-2">
                     {items.data.map(entry => (
-                      <ResultCard
+                      <CAENResultCard
                         key={entry.cod_caen}
                         entry={entry}
                         isFavorite={isFavorite(entry.cod_caen)}

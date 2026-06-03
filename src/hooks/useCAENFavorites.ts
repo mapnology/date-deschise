@@ -16,7 +16,7 @@ function save(entries: CAENEntry[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(entries))
 }
 
-export function useFavorites() {
+export function useCAENFavorites() {
   const [favorites, setFavorites] = useState<CAENEntry[]>(load)
 
   const isFavorite = useCallback(
