@@ -1,5 +1,5 @@
 import type { CAENEntry } from '../types/caen'
-import { ResultCard } from './ResultCard'
+import { CAENResultCard } from './CAENResultCard'
 
 interface Props {
   results: CAENEntry[]
@@ -27,7 +27,7 @@ function SkeletonCard() {
   )
 }
 
-export function ResultsList({ results, total, loading, error, query, isFavorite, onToggleFavorite }: Props) {
+export function CAENResultsList({ results, total, loading, error, query, isFavorite, onToggleFavorite }: Props) {
   if (loading) {
     return (
       <div className="grid gap-4 sm:grid-cols-2">
@@ -63,7 +63,7 @@ export function ResultsList({ results, total, loading, error, query, isFavorite,
       </p>
       <div className="grid gap-4 sm:grid-cols-2">
         {results.map(entry => (
-          <ResultCard
+          <CAENResultCard
             key={entry.cod_caen}
             entry={entry}
             isFavorite={isFavorite?.(entry.cod_caen)}

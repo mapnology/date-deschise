@@ -7,7 +7,7 @@ interface Props {
   onToggleFavorite?: (entry: CAENEntry) => void
 }
 
-export function ResultCard({ entry, isFavorite = false, onToggleFavorite }: Props) {
+export function CAENResultCard({ entry, isFavorite = false, onToggleFavorite }: Props) {
   const [copied, setCopied] = useState(false)
 
   function copy() {

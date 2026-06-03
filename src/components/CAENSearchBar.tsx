@@ -1,14 +1,14 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import type { CAENEntry } from '../types/caen'
 
-export interface SuggestionItem extends CAENEntry {
+export interface CAENSuggestionItem extends CAENEntry {
   isFavorite: boolean
 }
 
 interface Props {
   value: string
   onChange: (v: string) => void
-  suggestions?: SuggestionItem[]
+  suggestions?: CAENSuggestionItem[]
   onSelectSuggestion?: (entry: CAENEntry) => void
 }
 
@@ -29,7 +29,7 @@ const StarIcon = ({ filled }: { filled: boolean }) => (
   </svg>
 )
 
-export function SearchBar({ value, onChange, suggestions = [], onSelectSuggestion }: Props) {
+export function CAENSearchBar({ value, onChange, suggestions = [], onSelectSuggestion }: Props) {
   const [open, setOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -83,7 +83,7 @@ export function SearchBar({ value, onChange, suggestions = [], onSelectSuggestio
   const favSuggestions = suggestions.filter(s => s.isFavorite)
   const otherSuggestions = suggestions.filter(s => !s.isFavorite)
 
-  function renderItem(item: SuggestionItem, globalIndex: number) {
+  function renderItem(item: CAENSuggestionItem, globalIndex: number) {
     const isActive = globalIndex === activeIndex
     return (
       <li key={item.cod_caen}>

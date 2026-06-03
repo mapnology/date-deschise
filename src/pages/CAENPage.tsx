@@ -1,10 +1,10 @@
 import { useState, useMemo } from 'react'
-import { SearchBar, type SuggestionItem } from '../components/SearchBar'
-import { ResultsList } from '../components/ResultsList'
-import { ResultCard } from '../components/ResultCard'
-import { HierarchyExplorer } from '../components/HierarchyExplorer'
+import { CAENSearchBar, type CAENSuggestionItem } from '../components/CAENSearchBar'
+import { CAENResultsList } from '../components/CAENResultsList'
+import { CAENResultCard } from '../components/CAENResultCard'
+import { CAENHierarchyExplorer } from '../components/CAENHierarchyExplorer'
 import { useCAENSearch } from '../hooks/useCAENSearch'
-import { useFavorites } from '../hooks/useFavorites'
+import { useCAENFavorites } from '../hooks/useCAENFavorites'
 import type { CAENEntry } from '../types/caen'
 
 const MAX_SUGGESTIONS = 8
@@ -14,10 +14,10 @@ export function CAENPage() {
   const [query, setQuery] = useState('')
   const [showFavorites, setShowFavorites] = useState(true)
   const { results, total, loading, error } = useCAENSearch(query)
-  const { favorites, isFavorite, toggleFavorite } = useFavorites()
+  const { favorites, isFavorite, toggleFavorite } = useCAENFavorites()
   const isSearchActive = query.trim().length > 0
 
-  const suggestions = useMemo<SuggestionItem[]>(() => {
+  const suggestions = useMemo<CAENSuggestionItem[]>(() => {
     const trimmed = query.trim().toLowerCase()
     if (!trimmed) return []
 
@@ -54,7 +54,7 @@ export function CAENPage() {
       </div>
 
       <div className="mb-8 flex justify-center">
-        <SearchBar
+        <CAENSearchBar
           value={query}
           onChange={setQuery}
           suggestions={suggestions}
@@ -94,7 +94,7 @@ export function CAENPage() {
           {showFavorites && (
             <div className="grid gap-4 sm:grid-cols-2">
               {favorites.map(entry => (
-                <ResultCard
+                <CAENResultCard
                   key={entry.cod_caen}
                   entry={entry}
                   isFavorite
@@ -108,7 +108,7 @@ export function CAENPage() {
 
       {/* Search results */}
       {isSearchActive && (
-        <ResultsList
+        <CAENResultsList
           results={results}
           total={total}
           loading={loading}
@@ -121,7 +121,7 @@ export function CAENPage() {
 
       {/* Hierarchy explorer — kept mounted to preserve navigation state */}
       <div className={isSearchActive ? 'hidden' : ''}>
-        <HierarchyExplorer
+        <CAENHierarchyExplorer
           isFavorite={isFavorite}
           onToggleFavorite={toggleFavorite}
         />
