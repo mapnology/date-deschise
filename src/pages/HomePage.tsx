@@ -107,8 +107,9 @@ const API_SERVICES: ApiService[] = [
   {
     id: 'bnr',
     title: 'Curs Valutar BNR',
-    description: 'Update zilnic via BNR.',
-    status: 'coming-soon',
+    description: 'Cursuri oficiale de schimb față de RON, publicate zilnic de Banca Națională a României.',
+    status: 'live',
+    href: '/schimb',
     iconBg: 'bg-amber-50',
     icon: <IconTrendingUp />,
   },
