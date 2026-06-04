@@ -15,6 +15,16 @@ export function Footer() {
             className="underline underline-offset-2 hover:text-gray-600"
           >
             GitHub
+          </a>{' '}
+          sau
+          {' '}
+          <a
+            href="https://github.com/sponsors/mdomnita"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2 hover:text-gray-600"
+          >
+            susține proiectul
           </a>
         </p>
       </div>
