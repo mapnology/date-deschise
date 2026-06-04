@@ -23,11 +23,50 @@ function IconMapPin() {
   )
 }
 
+function IconLandmark() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="text-cyan-600">
+      <path d="M3 22h18" />
+      <path d="M6 18V9" />
+      <path d="M10 18V9" />
+      <path d="M14 18V9" />
+      <path d="M18 18V9" />
+      <path d="M12 2 3 7h18L12 2Z" />
+    </svg>
+  )
+}
+
 function IconBriefcase() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="text-violet-600">
       <rect width="20" height="14" x="2" y="7" rx="2" />
       <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+    </svg>
+  )
+}
+
+function IconBuilding() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-600">
+      <rect width="16" height="20" x="4" y="2" rx="2" />
+      <path d="M9 22v-4h6v4" />
+      <path d="M8 6h.01" />
+      <path d="M16 6h.01" />
+      <path d="M8 10h.01" />
+      <path d="M16 10h.01" />
+      <path d="M8 14h.01" />
+      <path d="M16 14h.01" />
+    </svg>
+  )
+}
+
+function IconReceipt() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="text-teal-600">
+      <path d="M4 3h16v18l-2.5-1.5L15 21l-2.5-1.5L10 21l-2.5-1.5L5 21l-1-0.6V3Z" />
+      <path d="M8 7h8" />
+      <path d="M8 11h8" />
+      <path d="M8 15h5" />
     </svg>
   )
 }
@@ -97,14 +136,6 @@ const API_SERVICES: ApiService[] = [
     icon: <IconMapPin />,
   },
   {
-    id: 'cor',
-    title: 'Coduri COR',
-    description: 'Clasificarea Ocupațiilor din România.',
-    status: 'coming-soon',
-    iconBg: 'bg-violet-50',
-    icon: <IconBriefcase />,
-  },
-  {
     id: 'bnr',
     title: 'Curs Valutar BNR',
     description: 'Cursuri oficiale de schimb față de RON, publicate zilnic de Banca Națională a României.',
@@ -112,6 +143,38 @@ const API_SERVICES: ApiService[] = [
     href: '/schimb',
     iconBg: 'bg-amber-50',
     icon: <IconTrendingUp />,
+  },
+  {
+    id: 'firme',
+    title: 'Firme',
+    description: 'Căutare și detalii pentru companii din România.',
+    status: 'coming-soon',
+    iconBg: 'bg-indigo-50',
+    icon: <IconBuilding />,
+  },
+  {
+    id: 'status-fiscal-tva',
+    title: 'Status fiscal / TVA',
+    description: 'Verificare status fiscal și înregistrare în scopuri de TVA.',
+    status: 'coming-soon',
+    iconBg: 'bg-teal-50',
+    icon: <IconReceipt />,
+  },
+  {
+    id: 'judete-uat',
+    title: 'Județe și UAT',
+    description: 'Navigare și căutare pentru județe, municipii, orașe, comune și sate.',
+    status: 'coming-soon',
+    iconBg: 'bg-cyan-50',
+    icon: <IconLandmark />,
+  },
+  {
+    id: 'cor',
+    title: 'Coduri COR',
+    description: 'Clasificarea Ocupațiilor din România.',
+    status: 'coming-soon',
+    iconBg: 'bg-violet-50',
+    icon: <IconBriefcase />,
   },
   {
     id: 'postal',
@@ -130,6 +193,9 @@ const API_SERVICES: ApiService[] = [
     icon: <IconCalendar />,
   },
 ]
+
+const LIVE_SERVICES = API_SERVICES.filter(service => service.status === 'live')
+const COMING_SOON_SERVICES = API_SERVICES.filter(service => service.status === 'coming-soon')
 
 // --- Toast ---
 
@@ -228,14 +294,41 @@ export function HomePage() {
       </section>
 
       {/* API Services grid */}
-      <section className="mx-auto max-w-5xl px-4 py-14 sm:px-6">
-        <h2 className="mb-8 text-sm font-semibold uppercase tracking-wider text-gray-400">
-          Seturi de date disponibile
-        </h2>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {API_SERVICES.map(service => (
-            <ServiceCard key={service.id} service={service} onComingSoon={handleComingSoon} />
-          ))}
+      <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+        <div className="mb-12">
+          <div className="mb-8 flex items-center justify-between gap-4">
+            <div>
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-400">
+                Disponibile acum
+              </h2>
+              <p className="mt-2 text-sm text-gray-500">
+                API-uri active, gata de folosit în aplicații și integrări.
+              </p>
+            </div>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {LIVE_SERVICES.map(service => (
+              <ServiceCard key={service.id} service={service} onComingSoon={handleComingSoon} />
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <div className="mb-8 flex items-center justify-between gap-4 border-t border-gray-100 pt-10">
+            <div>
+              <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-400">
+                În pregătire
+              </h2>
+              <p className="mt-2 text-sm text-gray-500">
+                Seturi de date planificate pentru următoarele extinderi ale platformei.
+              </p>
+            </div>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {COMING_SOON_SERVICES.map(service => (
+              <ServiceCard key={service.id} service={service} onComingSoon={handleComingSoon} />
+            ))}
+          </div>
         </div>
       </section>
 
