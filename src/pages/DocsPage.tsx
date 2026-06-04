@@ -354,6 +354,40 @@ function CAENDocsSection() {
 
         <hr className="border-gray-100" />
 
+        <div>
+          <h3 className="mb-4 text-base font-bold text-gray-900">Endpoint-uri pentru explorarea ierarhiei</h3>
+          <p className="mb-4 text-gray-600">
+            Frontend-ul folosește și endpoint-urile de mai jos pentru navigatorul ierarhic CAEN, astfel încât utilizatorii să poată parcurge clasificarea fără căutare textuală.
+          </p>
+          <div className="overflow-x-auto rounded-xl border border-gray-100 bg-white px-4">
+            <table className="w-full">
+              <thead>
+                <tr>
+                  <th className="py-2.5 pr-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Endpoint</th>
+                  <th className="py-2.5 pr-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Returnează</th>
+                  <th className="py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Descriere</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ['/sectiuni', 'Section[]', 'Lista secțiunilor CAEN disponibile.'],
+                  ['/sectiuni/{cod}/diviziuni', 'Division[]', 'Diviziunile pentru o secțiune CAEN.'],
+                  ['/diviziuni/{cod}/grupe', 'Group[]', 'Grupele dintr-o diviziune CAEN.'],
+                  ['/grupe/{cod}/clase', 'CAENEntry[]', 'Clasele finale dintr-o grupă CAEN.'],
+                ].map(([endpoint, result, description]) => (
+                  <tr key={endpoint} className="border-t border-gray-100">
+                    <td className="py-2.5 pr-4 font-mono text-sm font-medium text-blue-700">{endpoint}</td>
+                    <td className="py-2.5 pr-4 font-mono text-xs text-gray-400">{result}</td>
+                    <td className="py-2.5 text-sm text-gray-600">{description}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <hr className="border-gray-100" />
+
         {/* Schema */}
         <div>
           <h3 className="mb-4 text-base font-bold text-gray-900">Schema <code className="rounded bg-blue-50 px-2 py-0.5 font-mono text-sm text-blue-700">CAENEntry</code></h3>
@@ -620,7 +654,7 @@ export function DocsPage() {
           Documentație API
         </h1>
         <p className="text-gray-500">
-          API-uri REST gratuite pentru date publice din România. Toate endpoint-urile returnează JSON.
+          API-uri REST gratuite pentru date publice din România. Toate endpoint-urile returnează JSON, iar documentația de mai jos acoperă rutele folosite în frontend.
         </p>
         <div className="mt-4 flex flex-wrap items-center gap-2 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3">
           <span className="text-sm font-semibold text-gray-600">Base URL</span>

@@ -163,7 +163,7 @@ const API_SERVICES: ApiService[] = [
   {
     id: 'judete-uat',
     title: 'Județe și UAT',
-    description: 'Navigare și căutare pentru județe, municipii, orașe, comune și sate.',
+    description: 'Liste simplificate pentru județe și unități administrativ-teritoriale, utile în formulare și validări.',
     status: 'coming-soon',
     iconBg: 'bg-cyan-50',
     icon: <IconLandmark />,

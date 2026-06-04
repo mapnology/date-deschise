@@ -71,8 +71,8 @@ export function Footer() {
         <div>
           <h3 className="mb-2 font-semibold text-gray-700">Sursă</h3>
           <p className="leading-relaxed">
-            Datele provin din surse oficiale românești (INS, ONRC, data.gov.ro) și au caracter pur informativ. Pentru uz
-            oficial, consultați sursele originale.
+            Datele provin din surse oficiale românești, inclusiv INS, ONRC, BNR și data.gov.ro, și au caracter informativ.
+            Pentru uz oficial, consultați sursele originale.
           </p>
         </div>
       </div>
