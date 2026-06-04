@@ -48,16 +48,204 @@ function SectionLabel({ label }: { label: string }) {
   )
 }
 
-function EndpointHeader({ method, path, accent = 'blue' }: { method: string; path: string; accent?: 'blue' | 'emerald' }) {
+function EndpointHeader({ method, path, accent = 'blue' }: { method: string; path: string; accent?: 'blue' | 'emerald' | 'amber' }) {
   const colors = {
     blue: 'bg-blue-50 text-blue-700',
     emerald: 'bg-emerald-50 text-emerald-700',
+    amber: 'bg-amber-50 text-amber-700',
   }
   return (
     <div className="mb-4 flex items-center gap-3">
       <span className="rounded-lg bg-green-100 px-2.5 py-1 font-mono text-xs font-bold text-green-700">{method}</span>
       <code className={`rounded-lg px-3 py-1 font-mono text-sm font-semibold ${colors[accent]}`}>{path}</code>
     </div>
+  )
+}
+
+// ─── SCHIMB ──────────────────────────────────────────────────────────────────
+
+const SCHIMB_VALUTE_FETCH = `const res = await fetch('https://caen-api.ro/api/schimb/valute');
+const data = await res.json();
+// [{ valuta: "EUR", ultima_data: "2026-06-04", curs_unitar: 5.0291 }, ...]`
+
+const SCHIMB_VALUTE_CURL = `curl "https://caen-api.ro/api/schimb/valute"`
+
+const SCHIMB_VALUTE_BY_DATE_FETCH = `const res = await fetch('https://caen-api.ro/api/schimb/valute/2026-06-03');
+const data = await res.json();
+// toate valutele disponibile pentru data cerută`
+
+const SCHIMB_VALUTE_BY_DATE_CURL = `curl "https://caen-api.ro/api/schimb/valute/2026-06-03"`
+
+const SCHIMB_CURS_FETCH = `const res = await fetch('https://caen-api.ro/api/schimb/curs/EUR/2026-06-03');
+const data = await res.json();
+// { data: "2026-06-03", valuta: "EUR", curs: 5.0291, multiplicator: 1, curs_unitar: 5.0291 }`
+
+const SCHIMB_CURS_CURL = `curl "https://caen-api.ro/api/schimb/curs/EUR/2026-06-03"`
+
+const SCHIMB_VALUTE_RESPONSE = `[
+  {
+    "valuta": "EUR",
+    "ultima_data": "2026-06-04",
+    "curs_unitar": 5.0291
+  },
+  {
+    "valuta": "USD",
+    "ultima_data": "2026-06-04",
+    "curs_unitar": 4.6325
+  }
+]`
+
+const SCHIMB_CURS_RESPONSE = `{
+  "data": "2026-06-03",
+  "valuta": "EUR",
+  "curs": 5.0291,
+  "multiplicator": 1,
+  "curs_unitar": 5.0291
+}`
+
+function SchimbDocsSection() {
+  return (
+    <section id="schimb">
+      <div className="mb-8 flex items-center gap-3">
+        <span className="rounded-xl bg-amber-50 px-3 py-1.5 font-mono text-sm font-bold text-amber-700">BNR</span>
+        <h2 className="text-xl font-bold text-gray-900">Curs valutar oficial față de RON</h2>
+      </div>
+
+      <div className="space-y-10">
+        <div>
+          <EndpointHeader method="GET" path="/schimb/valute" accent="amber" />
+          <p className="mb-5 text-gray-600">
+            Returnează lista tuturor valutelor disponibile împreună cu ultima dată publicată și cursul unitar raportat la RON.
+          </p>
+          <SectionLabel label="Exemple" />
+          <div className="space-y-3">
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-gray-500">JavaScript (fetch)</p>
+              <CodeBlock code={SCHIMB_VALUTE_FETCH} language="javascript" />
+            </div>
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-gray-500">cURL</p>
+              <CodeBlock code={SCHIMB_VALUTE_CURL} />
+            </div>
+          </div>
+          <SectionLabel label="Răspuns" />
+          <CodeBlock code={SCHIMB_VALUTE_RESPONSE} language="json" />
+        </div>
+
+        <hr className="border-gray-100" />
+
+        <div>
+          <EndpointHeader method="GET" path="/schimb/valute/{data}" accent="amber" />
+          <p className="mb-5 text-gray-600">
+            Returnează toate cursurile disponibile pentru o dată anume, în format <code className="rounded bg-amber-50 px-1.5 py-0.5 font-mono text-xs text-amber-700">YYYY-MM-DD</code>.
+          </p>
+          <SectionLabel label="Parametri" />
+          <ParamsTable>
+            <ParamRow name="data" type="string" required description="Data pentru care se cer cursurile, în format ISO (ex: 2026-06-03)." />
+          </ParamsTable>
+          <SectionLabel label="Exemple" />
+          <div className="space-y-3">
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-gray-500">JavaScript (fetch)</p>
+              <CodeBlock code={SCHIMB_VALUTE_BY_DATE_FETCH} language="javascript" />
+            </div>
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-gray-500">cURL</p>
+              <CodeBlock code={SCHIMB_VALUTE_BY_DATE_CURL} />
+            </div>
+          </div>
+          <SectionLabel label="Răspuns" />
+          <CodeBlock code={SCHIMB_VALUTE_RESPONSE} language="json" />
+        </div>
+
+        <hr className="border-gray-100" />
+
+        <div>
+          <EndpointHeader method="GET" path="/schimb/curs/{valuta}/{data}" accent="amber" />
+          <p className="mb-5 text-gray-600">
+            Returnează cursul pentru o singură valută și o anumită dată. Util pentru interogări punctuale sau afișarea detaliilor unei monede.
+          </p>
+          <SectionLabel label="Parametri" />
+          <ParamsTable>
+            <ParamRow name="valuta" type="string" required description="Codul valutei, de regulă ISO 4217, scris cu majuscule (ex: EUR, USD, GBP)." />
+            <ParamRow name="data" type="string" required description="Data cursului în format ISO YYYY-MM-DD (ex: 2026-06-03)." />
+          </ParamsTable>
+          <SectionLabel label="Exemple" />
+          <div className="space-y-3">
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-gray-500">JavaScript (fetch)</p>
+              <CodeBlock code={SCHIMB_CURS_FETCH} language="javascript" />
+            </div>
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-gray-500">cURL</p>
+              <CodeBlock code={SCHIMB_CURS_CURL} />
+            </div>
+          </div>
+          <SectionLabel label="Răspuns" />
+          <CodeBlock code={SCHIMB_CURS_RESPONSE} language="json" />
+        </div>
+
+        <hr className="border-gray-100" />
+
+        <div>
+          <h3 className="mb-4 text-base font-bold text-gray-900">Schema <code className="rounded bg-amber-50 px-2 py-0.5 font-mono text-sm text-amber-700">ValutaInfo</code></h3>
+          <div className="overflow-x-auto rounded-xl border border-gray-100 bg-white px-4">
+            <table className="w-full">
+              <thead>
+                <tr>
+                  <th className="py-2.5 pr-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Câmp</th>
+                  <th className="py-2.5 pr-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Tip</th>
+                  <th className="py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Descriere</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ['valuta', 'string', 'Codul valutei'],
+                  ['ultima_data', 'string', 'Ultima dată pentru care există curs publicat'],
+                  ['curs_unitar', 'number', 'Valoarea unei unități din valută exprimată în RON'],
+                ].map(([field, type, desc]) => (
+                  <tr key={field} className="border-t border-gray-100">
+                    <td className="py-2.5 pr-4 font-mono text-sm font-medium text-amber-700">{field}</td>
+                    <td className="py-2.5 pr-4 font-mono text-xs text-gray-400">{type}</td>
+                    <td className="py-2.5 text-sm text-gray-600">{desc}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="mb-4 text-base font-bold text-gray-900">Schema <code className="rounded bg-amber-50 px-2 py-0.5 font-mono text-sm text-amber-700">CursZi</code></h3>
+          <div className="overflow-x-auto rounded-xl border border-gray-100 bg-white px-4">
+            <table className="w-full">
+              <thead>
+                <tr>
+                  <th className="py-2.5 pr-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Câmp</th>
+                  <th className="py-2.5 pr-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Tip</th>
+                  <th className="py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Descriere</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ['data', 'string', 'Data pentru care a fost returnat cursul'],
+                  ['valuta', 'string', 'Codul valutei cerute'],
+                  ['curs', 'number', 'Valoarea totală publicată de BNR pentru multiplicatorul monedei'],
+                  ['multiplicator', 'integer', 'Numărul de unități valutare la care se referă câmpul curs'],
+                  ['curs_unitar', 'number', 'Valoarea unei unități din valută exprimată în RON'],
+                ].map(([field, type, desc]) => (
+                  <tr key={field} className="border-t border-gray-100">
+                    <td className="py-2.5 pr-4 font-mono text-sm font-medium text-amber-700">{field}</td>
+                    <td className="py-2.5 pr-4 font-mono text-xs text-gray-400">{type}</td>
+                    <td className="py-2.5 text-sm text-gray-600">{desc}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
   )
 }
 
@@ -462,6 +650,13 @@ export function DocsPage() {
           >
             <span className="font-mono">SIRUTA</span>
           </a>
+          <a
+            href="#schimb"
+            className="flex items-center gap-2 rounded-xl border border-amber-100 bg-amber-50 px-4 py-2.5 text-sm font-semibold text-amber-700 transition hover:bg-amber-100"
+          >
+            <span className="font-mono">BNR</span>
+            <span className="text-amber-500">Curs valutar</span>
+          </a>
         </div>
       </div>
 
@@ -469,6 +664,8 @@ export function DocsPage() {
         <CAENDocsSection />
         <hr className="border-gray-200" />
         <SirutaDocsSection />
+        <hr className="border-gray-200" />
+        <SchimbDocsSection />
       </div>
     </main>
   )
