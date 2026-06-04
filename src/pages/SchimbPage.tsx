@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getValute, getCursZi } from '../services/schimbApi'
+import { getValute, getValuteByData, getCursZi } from '../services/schimbApi'
 import type { ValutaInfo, CursZi } from '../types/schimb'
 
 function localToday(): string {
@@ -10,7 +10,8 @@ function localToday(): string {
   return `${y}-${m}-${day}`
 }
 
-function formatDate(dateStr: string): string {
+function formatDate(dateStr: string | undefined | null): string {
+  if (!dateStr) return ''
   const [y, m, d] = dateStr.split('-')
   return `${d}.${m}.${y}`
 }
@@ -83,50 +84,72 @@ function CursZiResult({ cursZi, onBack }: { cursZi: CursZi; onBack: () => void }
 }
 
 export function SchimbPage() {
-  const [valute, setValute] = useState<ValutaInfo[]>([])
+  const [allValute, setAllValute] = useState<ValutaInfo[]>([])
+  const [displayValute, setDisplayValute] = useState<ValutaInfo[]>([])
   const [selectedValuta, setSelectedValuta] = useState('')
   const [selectedDate, setSelectedDate] = useState(localToday())
   const [cursZi, setCursZi] = useState<CursZi | null>(null)
+  const [isFiltered, setIsFiltered] = useState(false)
+  const [displayDate, setDisplayDate] = useState<string | null>(null)
   const [loadingAll, setLoadingAll] = useState(true)
-  const [loadingCurs, setLoadingCurs] = useState(false)
+  const [loadingResult, setLoadingResult] = useState(false)
   const [errorAll, setErrorAll] = useState<string | null>(null)
-  const [errorCurs, setErrorCurs] = useState<string | null>(null)
+  const [errorResult, setErrorResult] = useState<string | null>(null)
 
   useEffect(() => {
     getValute()
-      .then(data => { setValute(data); setLoadingAll(false) })
-      .catch(() => { setErrorAll('Nu s-au putut încărca cursurile valutare.'); setLoadingAll(false) })
+      .then(data => {
+        setAllValute(data)
+        setDisplayValute(data)
+        setLoadingAll(false)
+      })
+      .catch(() => {
+        setErrorAll('Nu s-au putut încărca cursurile valutare.')
+        setLoadingAll(false)
+      })
   }, [])
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault()
-    if (!selectedValuta) return
-    setLoadingCurs(true)
-    setErrorCurs(null)
+    setLoadingResult(true)
+    setErrorResult(null)
     setCursZi(null)
-    getCursZi(selectedValuta, selectedDate)
-      .then(data => { setCursZi(data); setLoadingCurs(false) })
-      .catch(() => { setErrorCurs('Nu s-a găsit cursul pentru valuta și data selectate.'); setLoadingCurs(false) })
+    setIsFiltered(true)
+    setDisplayDate(selectedDate)
+
+    if (selectedValuta) {
+      getCursZi(selectedValuta, selectedDate)
+        .then(data => { setCursZi(data); setLoadingResult(false) })
+        .catch(() => { setErrorResult('Nu s-a găsit cursul pentru valuta și data selectate.'); setLoadingResult(false) })
+    } else {
+      getValuteByData(selectedDate)
+        .then(data => { setDisplayValute(data); setLoadingResult(false) })
+        .catch(() => { setErrorResult('Nu s-au putut încărca cursurile pentru data selectată.'); setLoadingResult(false) })
+    }
   }
 
   function handleReset() {
     setSelectedValuta('')
     setSelectedDate(localToday())
     setCursZi(null)
-    setErrorCurs(null)
+    setErrorResult(null)
+    setDisplayValute(allValute)
+    setIsFiltered(false)
+    setDisplayDate(null)
   }
 
   function handleSelectCard(valuta: string) {
     setSelectedValuta(valuta)
-    setLoadingCurs(true)
-    setErrorCurs(null)
+    setLoadingResult(true)
+    setErrorResult(null)
     setCursZi(null)
+    setIsFiltered(true)
     getCursZi(valuta, selectedDate)
-      .then(data => { setCursZi(data); setLoadingCurs(false) })
-      .catch(() => { setErrorCurs('Nu s-a găsit cursul pentru valuta și data selectate.'); setLoadingCurs(false) })
+      .then(data => { setCursZi(data); setLoadingResult(false) })
+      .catch(() => { setErrorResult('Nu s-a găsit cursul pentru valuta și data selectate.'); setLoadingResult(false) })
   }
 
-  const showAllGrid = !cursZi && !loadingCurs && !errorCurs
+  const showGrid = !cursZi && !loadingResult && !errorResult
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
@@ -153,7 +176,7 @@ export function SchimbPage() {
               className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
             >
               <option value="">Toate valutele</option>
-              {valute.map(v => (
+              {allValute.map(v => (
                 <option key={v.valuta} value={v.valuta}>{v.valuta}</option>
               ))}
             </select>
@@ -174,12 +197,12 @@ export function SchimbPage() {
           <div className="flex shrink-0 gap-2">
             <button
               type="submit"
-              disabled={!selectedValuta || loadingCurs}
+              disabled={loadingResult}
               className="rounded-xl bg-amber-500 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-40"
             >
               Caută
             </button>
-            {(cursZi || errorCurs) && (
+            {isFiltered && (
               <button
                 type="button"
                 onClick={handleReset}
@@ -192,7 +215,7 @@ export function SchimbPage() {
         </div>
       </form>
 
-      {/* Loading all */}
+      {/* Initial skeleton */}
       {loadingAll && <SkeletonGrid />}
 
       {/* Error loading all */}
@@ -202,34 +225,39 @@ export function SchimbPage() {
         </div>
       )}
 
-      {/* Loading specific curs */}
-      {loadingCurs && (
+      {/* Loading result */}
+      {loadingResult && (
         <div className="h-44 animate-pulse rounded-2xl bg-gray-100" />
       )}
 
-      {/* Error specific curs */}
-      {!loadingCurs && errorCurs && (
+      {/* Error result */}
+      {!loadingResult && errorResult && (
         <div className="rounded-xl border border-red-100 bg-red-50 px-6 py-10 text-center">
-          <p className="text-sm font-medium text-red-600">{errorCurs}</p>
+          <p className="text-sm font-medium text-red-600">{errorResult}</p>
           <button onClick={handleReset} className="mt-4 text-sm text-red-500 underline hover:text-red-700">
             Înapoi la toate valutele
           </button>
         </div>
       )}
 
-      {/* Specific curs result */}
-      {!loadingCurs && cursZi && (
+      {/* Single currency result */}
+      {!loadingResult && cursZi && (
         <CursZiResult cursZi={cursZi} onBack={handleReset} />
       )}
 
       {/* All currencies grid */}
-      {!loadingAll && !errorAll && showAllGrid && (
+      {!loadingAll && !errorAll && showGrid && (
         <>
           <p className="mb-4 text-sm text-gray-400">
-            {valute.length} valute disponibile — click pe o valută pentru detalii
+            {displayValute.length} valute
+            {isFiltered && displayDate && (
+              <span> — {formatDate(displayDate)}</span>
+            )}
+            {!isFiltered && ' disponibile'}
+            {!cursZi && ' — click pe o valută pentru detalii'}
           </p>
           <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {valute.map(v => (
+            {displayValute.map(v => (
               <ValutaCard key={v.valuta} info={v} onSelect={handleSelectCard} />
             ))}
           </div>

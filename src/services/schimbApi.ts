@@ -8,6 +8,12 @@ export async function getValute(): Promise<ValutaInfo[]> {
   return res.json()
 }
 
+export async function getValuteByData(data: string): Promise<ValutaInfo[]> {
+  const res = await fetch(`${BASE_URL}/schimb/valute/${data}`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
 export async function getCursZi(valuta: string, data: string): Promise<CursZi> {
   const res = await fetch(`${BASE_URL}/schimb/curs/${valuta}/${data}`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
