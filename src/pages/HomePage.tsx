@@ -186,9 +186,10 @@ const API_SERVICES: ApiService[] = [
   },
   {
     id: 'holidays',
-    title: 'Sărbători Legale',
-    description: 'Calendarul zilelor libere oficiale.',
-    status: 'coming-soon',
+    title: 'Zile Libere & Concediu',
+    description: 'Calendarul zilelor libere legale din România și sugestii de punți pentru a maximiza concediul.',
+    status: 'live',
+    href: '/zile-libere',
     iconBg: 'bg-sky-50',
     icon: <IconCalendar />,
   },

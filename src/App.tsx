@@ -6,6 +6,7 @@ import { HomePage } from './pages/HomePage'
 import { CAENPage } from './pages/CAENPage'
 import { SirutaPage } from './pages/SirutaPage'
 import { SchimbPage } from './pages/SchimbPage'
+import { ZileLiberePage } from './pages/ZileLiberePage'
 import { DocsPage } from './pages/DocsPage'
 import { AboutPage } from './pages/AboutPage'
 
@@ -14,6 +15,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/caen': 'Coduri CAEN Rev. 3',
   '/siruta': 'Coduri SIRUTA',
   '/schimb': 'Curs Valutar BNR',
+  '/zile-libere': 'Zile Libere & Idei de Concediu',
   '/documentatie': 'Documentație API',
   '/despre': 'Despre proiect',
 }
@@ -39,6 +41,7 @@ export default function App() {
             <Route path="/caen" element={<CAENPage />} />
             <Route path="/siruta" element={<SirutaPage />} />
             <Route path="/schimb" element={<SchimbPage />} />
+            <Route path="/zile-libere" element={<ZileLiberePage />} />
             <Route path="/documentatie" element={<DocsPage />} />
             <Route path="/despre" element={<AboutPage />} />
           </Routes>
