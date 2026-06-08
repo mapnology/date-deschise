@@ -27,6 +27,21 @@ function todayStr(): string {
   return new Date().toISOString().split('T')[0]
 }
 
+const ZILE_SAPTAMANA_SCURT = ['Lun', 'Mar', 'Mie', 'Joi', 'Vin', 'Sâm', 'Dum']
+
+function pad2(n: number): string {
+  return n.toString().padStart(2, '0')
+}
+
+function daysInMonth(year: number, month: number): number {
+  return new Date(year, month, 0).getDate()
+}
+
+function firstWeekdayOffset(year: number, month: number): number {
+  const jsDay = new Date(year, month - 1, 1).getDay()
+  return (jsDay + 6) % 7
+}
+
 // --- Shared UI ---
 
 function SkeletonRows() {
@@ -75,7 +90,7 @@ function ZiLiberaRow({ zi }: { zi: ZiLibera }) {
       className={`flex items-center gap-4 rounded-xl border p-4 transition ${
         isWeekend
           ? 'border-amber-100 bg-amber-50/40'
-          : 'border-sky-100 bg-sky-50/30 hover:border-sky-200'
+          : 'border-green-100 bg-green-50/30 hover:border-green-200'
       } ${isPast ? 'opacity-50' : ''}`}
     >
       <div className="shrink-0 w-10 text-center">
@@ -99,7 +114,7 @@ function ZiLiberaRow({ zi }: { zi: ZiLibera }) {
           Weekend
         </span>
       ) : (
-        <span className="shrink-0 rounded-full bg-sky-100 px-2.5 py-0.5 text-xs font-semibold text-sky-700">
+        <span className="shrink-0 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-700">
           Zi de lucru
         </span>
       )}
@@ -153,14 +168,14 @@ function CalendarTab() {
           <span className="rounded-full border border-gray-200 bg-white px-3 py-1 text-sm font-medium text-gray-700 shadow-sm">
             Total <strong className="ml-1">{zile.length}</strong>
           </span>
-          <span className="rounded-full border border-sky-100 bg-sky-50 px-3 py-1 text-sm font-semibold text-sky-700">
+          <span className="rounded-full border border-green-100 bg-green-50 px-3 py-1 text-sm font-semibold text-green-700">
             Zi de lucru <strong className="ml-1">{weekdayCount}</strong>
           </span>
           <span className="rounded-full border border-amber-100 bg-amber-50 px-3 py-1 text-sm font-semibold text-amber-700">
             Weekend <strong className="ml-1">{weekendCount}</strong>
           </span>
           {remainingCount > 0 && (
-            <span className="rounded-full border border-green-100 bg-green-50 px-3 py-1 text-sm font-semibold text-green-700">
+            <span className="rounded-full border border-purple-100 bg-purple-50 px-3 py-1 text-sm font-semibold text-purple-700">
               Rămase <strong className="ml-1">{remainingCount}</strong>
             </span>
           )}
@@ -214,6 +229,150 @@ function CalendarTab() {
                 ))}
               </div>
             )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// --- Calendar Vizual Tab ---
+
+function celulaZiClase(zi: ZiLibera | undefined, esteConcediu: boolean): string {
+  if (zi) {
+    return zi.cade_in_weekend
+      ? 'border-amber-100 bg-amber-50 text-amber-700'
+      : 'border-green-100 bg-green-50 text-green-700'
+  }
+  if (esteConcediu) return 'border-sky-100 bg-sky-50 text-sky-700'
+  return 'border-gray-100 bg-white text-gray-500'
+}
+
+function LunaGrid({
+  an, luna, nume, zileMap, concediuSet, today,
+}: {
+  an: number
+  luna: number
+  nume: string
+  zileMap: Map<string, ZiLibera>
+  concediuSet: Set<string>
+  today: string
+}) {
+  const nrZile = daysInMonth(an, luna)
+  const offset = firstWeekdayOffset(an, luna)
+  const celule: (string | null)[] = [
+    ...Array.from({ length: offset }, () => null),
+    ...Array.from({ length: nrZile }, (_, i) => `${an}-${pad2(luna)}-${pad2(i + 1)}`),
+  ]
+
+  return (
+    <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+      <h3 className="mb-3 text-sm font-semibold text-gray-700">{nume}</h3>
+      <div className="grid grid-cols-7 gap-1">
+        {ZILE_SAPTAMANA_SCURT.map(z => (
+          <div key={z} className="pb-1 text-center text-[9px] font-semibold uppercase tracking-wide text-gray-400">
+            {z[0]}
+          </div>
+        ))}
+
+        {celule.map((data, i) => {
+          if (!data) return <div key={`gol-${i}`} />
+
+          const zi = zileMap.get(data)
+          const esteConcediu = !zi && concediuSet.has(data)
+          const esteAzi = data === today
+          const trecut = data < today
+
+          return (
+            <div
+              key={data}
+              title={zi?.denumire_sarbatoare ?? (esteConcediu ? 'Concediu recomandat (punte)' : undefined)}
+              className={`flex aspect-square items-center justify-center rounded-md border text-xs font-semibold transition ${celulaZiClase(zi, esteConcediu)} ${
+                trecut ? 'opacity-50' : 'opacity-100'
+              } ${esteAzi ? 'ring-2 ring-blue-400 ring-offset-1' : ''}`}
+            >
+              {parseInt(data.split('-')[2], 10)}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function CalendarVizualTab() {
+  const [zile, setZile] = useState<ZiLibera[]>([])
+  const [punti, setPunti] = useState<PunteRecomandare[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [retryToken, setRetryToken] = useState(0)
+
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    setError(null)
+
+    async function load() {
+      try {
+        const [zileData, puntiData] = await Promise.all([getZileLibere(), getPunti()])
+        if (!cancelled) {
+          setZile(zileData)
+          setPunti(puntiData)
+        }
+      } catch (e) {
+        if (!cancelled) setError(e instanceof Error ? e.message : 'Eroare necunoscută')
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+
+    load()
+    return () => { cancelled = true }
+  }, [retryToken])
+
+  const an = zile.length > 0 ? parseInt(zile[0].data.split('-')[0], 10) : new Date().getFullYear()
+  const zileMap = new Map(zile.map(z => [z.data, z]))
+  const concediuSet = new Set(punti.flatMap(p => p.zile_concediu))
+  const today = todayStr()
+
+  return (
+    <div>
+      <p className="mb-5 text-sm text-gray-500">
+        Vizualizare anuală a sărbătorilor legale, weekendurilor și zilelor de concediu recomandate pentru punți. Zilele din trecut apar semitransparente.
+      </p>
+
+      {!loading && !error && (
+        <div className="mb-5 flex flex-wrap items-center gap-4 text-xs text-gray-500">
+          <span className="flex items-center gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-full bg-amber-400" /> Sărbătoare în weekend
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-full bg-green-400" /> Sărbătoare în zi lucrătoare
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-2.5 w-2.5 rounded-full bg-sky-400" /> Concediu recomandat (punte)
+          </span>
+        </div>
+      )}
+
+      {loading && <SkeletonCards />}
+
+      {!loading && error && (
+        <ErrorState message={error} onRetry={() => setRetryToken(t => t + 1)} />
+      )}
+
+      {!loading && !error && (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {LUNI.map((nume, i) => (
+            <LunaGrid
+              key={i + 1}
+              an={an}
+              luna={i + 1}
+              nume={nume}
+              zileMap={zileMap}
+              concediuSet={concediuSet}
+              today={today}
+            />
+          ))}
         </div>
       )}
     </div>
@@ -375,7 +534,7 @@ function PuntiTab() {
 // --- Page ---
 
 export function ZileLiberePage() {
-  const [tab, setTab] = useState<'calendar' | 'punti'>('calendar')
+  const [tab, setTab] = useState<'calendar' | 'lunar' | 'punti'>('calendar')
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
@@ -398,6 +557,16 @@ export function ZileLiberePage() {
           Calendar Sărbători Legale
         </button>
         <button
+          onClick={() => setTab('lunar')}
+          className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition ${
+            tab === 'lunar'
+              ? 'bg-white text-gray-900 shadow-sm'
+              : 'text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          Calendar Vizual
+        </button>
+        <button
           onClick={() => setTab('punti')}
           className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition ${
             tab === 'punti'
@@ -411,6 +580,9 @@ export function ZileLiberePage() {
 
       <div className={tab !== 'calendar' ? 'hidden' : ''}>
         <CalendarTab />
+      </div>
+      <div className={tab !== 'lunar' ? 'hidden' : ''}>
+        <CalendarVizualTab />
       </div>
       <div className={tab !== 'punti' ? 'hidden' : ''}>
         <PuntiTab />
