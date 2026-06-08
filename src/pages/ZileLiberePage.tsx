@@ -27,6 +27,26 @@ function todayStr(): string {
   return new Date().toISOString().split('T')[0]
 }
 
+function compactDate(dateStr: string): string {
+  return dateStr.replaceAll('-', '')
+}
+
+function compactDatePlusOne(dateStr: string): string {
+  const [y, m, d] = dateStr.split('-').map(Number)
+  const next = new Date(Date.UTC(y, m - 1, d + 1))
+  return `${next.getUTCFullYear()}${String(next.getUTCMonth() + 1).padStart(2, '0')}${String(next.getUTCDate()).padStart(2, '0')}`
+}
+
+function googleCalendarLink({ title, start, end, details }: { title: string; start: string; end?: string; details?: string }): string {
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: title,
+    dates: `${compactDate(start)}/${compactDatePlusOne(end ?? start)}`,
+  })
+  if (details) params.set('details', details)
+  return `https://calendar.google.com/calendar/render?${params}`
+}
+
 const ZILE_SAPTAMANA_SCURT = ['Lun', 'Mar', 'Mie', 'Joi', 'Vin', 'Sâm', 'Dum']
 
 function pad2(n: number): string {
@@ -61,6 +81,15 @@ function SkeletonCards() {
         <div key={i} className="h-44 animate-pulse rounded-2xl bg-gray-100" />
       ))}
     </div>
+  )
+}
+
+function CalendarPlusIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M3 10h18M8 3v4M16 3v4M12 14v6M9 17h6" />
+    </svg>
   )
 }
 
@@ -118,6 +147,16 @@ function ZiLiberaRow({ zi }: { zi: ZiLibera }) {
           Zi de lucru
         </span>
       )}
+
+      <a
+        href={googleCalendarLink({ title: zi.denumire_sarbatoare, start: zi.data, details: zi.observatii ?? undefined })}
+        target="_blank"
+        rel="noopener noreferrer"
+        title="Adaugă în Google Calendar"
+        className="shrink-0 rounded-full border border-gray-200 bg-white p-2 text-gray-400 transition hover:border-blue-200 hover:text-blue-600"
+      >
+        <CalendarPlusIcon className="h-4 w-4" />
+      </a>
     </div>
   )
 }
@@ -433,6 +472,21 @@ function PunteCard({ punta }: { punta: PunteRecomandare }) {
         </div>
         <p className="mt-1.5 text-[10px] text-gray-300">✦ concediu</p>
       </div>
+
+      <a
+        href={googleCalendarLink({
+          title: `Punte de ${zile_libere_totale} zile libere`,
+          start: punta.interval_start,
+          end: punta.interval_end,
+          details: `Ia ${concediuLabel} de concediu pe ${concediuDates} și ai ${zile_libere_totale} zile libere consecutive.`,
+        })}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex w-fit items-center gap-2 self-start rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 transition hover:border-blue-200 hover:text-blue-600"
+      >
+        <CalendarPlusIcon className="h-4 w-4" />
+        Adaugă în Google Calendar
+      </a>
     </article>
   )
 }
