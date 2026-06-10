@@ -1,13 +1,79 @@
-import { useState, useEffect } from 'react'
-import { getValute, getValuteByData, getCursZi } from '../services/schimbApi'
-import type { ValutaInfo, CursZi } from '../types/schimb'
+import { useState, useEffect, useRef } from 'react'
+import { getValute, getValuteByData } from '../services/schimbApi'
+import type { ValutaInfo } from '../types/schimb'
+
+const PRIMARY_CURRENCIES = ['EUR', 'USD', 'GBP', 'CHF', 'CAD', 'AUD', 'JPY', 'HUF', 'BGN', 'MDL']
+
+const TVA_PRESETS: { label: string; value: number }[] = [
+  { label: '0%', value: 0 },
+  { label: '11', value: 11 },
+  { label: '21%', value: 21 },
+]
+
+const CURRENCY_NAMES: Record<string, string> = {
+    "AED": "Dirham Emiratele Arabe Unite",
+    "AUD": "Dolar australian",
+    "BGN": "Lev bulgăresc",
+    "BRL": "Real brazilian",
+    "CAD": "Dolar canadian",
+    "CHF": "Franc elvețian",
+    "CNY": "Yuan renminbi chinezesc",
+    "CZK": "Coroană cehă",
+    "DKK": "Coroană daneză",
+    "EGP": "Liră egipteană",
+    "EUR": "Euro",
+    "GBP": "Liră sterlină",
+    "HKD": "Dolar Hong Kong",
+    "HRK": "Kuna croată",
+    "HUF": "Forint maghiar",
+    "IDR": "Rupie indoneziană",
+    "ILS": "Shekel israelian nou",
+    "INR": "Rupie indiană",
+    "ISK": "Coroană islandeză",
+    "JPY": "Yen japonez",
+    "KRW": "Won sud-coreean",
+    "MDL": "Leu moldovenesc",
+    "MXN": "Peso mexican",
+    "MYR": "Ringgit malaezian",
+    "NOK": "Coroană norvegiană",
+    "NZD": "Dolar neozeelandez",
+    "PHP": "Peso filipinez",
+    "PLN": "Zlot polonez",
+    "RSD": "Dinar sârbesc",
+    "RUB": "Rublă rusească",
+    "SEK": "Coroană suedeză",
+    "SGD": "Dolar Singapore",
+    "SKK": "Coroană slovacă",
+    "THB": "Baht thailandez",
+    "TRY": "Liră turcească",
+    "UAH": "Hryvnia ucraineană",
+    "USD": "Dolar american",
+    "XAU": "Aur",
+    "XDR": "Drepturi speciale de tragere",
+    "ZAR": "Rand sud-african",
+}
+
+const CURRENCY_REGIONS: Record<string, string> = {
+  EUR: 'Europa', GBP: 'Europa', CHF: 'Europa', SEK: 'Europa',
+  NOK: 'Europa', DKK: 'Europa', HUF: 'Europa', PLN: 'Europa',
+  CZK: 'Europa', BGN: 'Europa', MDL: 'Europa', RUB: 'Europa',
+  TRY: 'Europa', UAH: 'Europa', HRK: 'Europa',
+  USD: 'America', CAD: 'America', MXN: 'America', BRL: 'America',
+  JPY: 'Asia', CNY: 'Asia', HKD: 'Asia', KRW: 'Asia',
+  INR: 'Asia', SGD: 'Asia', THB: 'Asia', MYR: 'Asia',
+  AED: 'Asia', SAR: 'Asia', ILS: 'Asia',
+  AUD: 'Pacific', NZD: 'Pacific',
+  ZAR: 'Africa',
+  XAU: 'Altele', XDR: 'Altele',
+}
+
+type SortKey = 'code' | 'rate'
+type SortDir = 'asc' | 'desc'
+type ConvertTrigger = { currency: string; seq: number } | null
 
 function localToday(): string {
   const d = new Date()
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
 function formatDate(dateStr: string | undefined | null): string {
@@ -16,68 +82,511 @@ function formatDate(dateStr: string | undefined | null): string {
   return `${d}.${m}.${y}`
 }
 
-function formatRate(rate: number): string {
-  return rate.toLocaleString('ro-RO', { minimumFractionDigits: 4, maximumFractionDigits: 4 })
+function formatNum(n: number, decimals: number): string {
+  return n.toLocaleString('ro-RO', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  })
 }
 
-function SkeletonGrid() {
+function SwapIcon() {
   return (
-    <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-4">
-      {Array.from({ length: 16 }).map((_, i) => (
-        <div key={i} className="h-28 animate-pulse rounded-xl bg-gray-100" />
-      ))}
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M7 16V4m0 0L3 8m4-4 4 4" />
+      <path d="M17 8v12m0 0 4-4m-4 4-4-4" />
+    </svg>
+  )
+}
+
+function ConvertorCard({
+  valute,
+  trigger,
+  converterRef,
+}: {
+  valute: ValutaInfo[]
+  trigger: ConvertTrigger
+  converterRef: React.RefObject<HTMLDivElement>
+}) {
+  const [amount, setAmount] = useState('100')
+  const [fromCurrency, setFromCurrency] = useState('EUR')
+  const [toCurrency, setToCurrency] = useState('RON')
+  const [tvaPreset, setTvaPreset] = useState(19)
+  const [customTva, setCustomTva] = useState('')
+  const [useCustomTva, setUseCustomTva] = useState(false)
+  const [includesTva, setIncludesTva] = useState(false)
+  const [decimals, setDecimals] = useState(2)
+
+  useEffect(() => {
+    if (trigger) {
+      setFromCurrency(trigger.currency)
+      setToCurrency('RON')
+    }
+  }, [trigger])
+
+  const allOptions = [{ valuta: 'RON', curs_unitar: 1, ultima_data: '' } as ValutaInfo, ...valute]
+
+  function getRate(currency: string): number {
+    if (currency === 'RON') return 1
+    return valute.find(v => v.valuta === currency)?.curs_unitar ?? 0
+  }
+
+  function swap() {
+    setFromCurrency(toCurrency)
+    setToCurrency(fromCurrency)
+  }
+
+  const amountNum = parseFloat(amount.replace(',', '.'))
+  const fromRate = getRate(fromCurrency)
+  const toRate = getRate(toCurrency)
+  const convertedAmount =
+    !isNaN(amountNum) && amountNum >= 0 && fromRate > 0 && toRate > 0
+      ? (amountNum * fromRate) / toRate
+      : null
+
+  const effectiveTvaRate = useCustomTva
+    ? parseFloat(customTva.replace(',', '.'))
+    : tvaPreset
+  const tvaApplies = !isNaN(effectiveTvaRate) && effectiveTvaRate > 0
+
+  let baseAmount: number | null = null
+  let tvaAmount: number | null = null
+  let totalAmount: number | null = null
+
+  if (convertedAmount !== null && tvaApplies) {
+    if (includesTva) {
+      baseAmount = convertedAmount / (1 + effectiveTvaRate / 100)
+      tvaAmount = convertedAmount - baseAmount
+    } else {
+      baseAmount = convertedAmount
+      tvaAmount = convertedAmount * (effectiveTvaRate / 100)
+      totalAmount = convertedAmount + tvaAmount
+    }
+  }
+
+  const fmt = (n: number) => formatNum(n, decimals)
+
+  return (
+    <div ref={converterRef} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+      <div className="mb-5 flex items-center justify-between">
+        <h2 className="text-base font-semibold text-gray-800">Convertor valutar + TVA</h2>
+        <div className="flex overflow-hidden rounded-lg border border-gray-200 text-xs">
+          {([2, 4, 8] as const).map(d => (
+            <button
+              key={d}
+              type="button"
+              onClick={() => setDecimals(d)}
+              className={`px-2.5 py-1 font-mono transition ${
+                decimals === d ? 'bg-amber-500 text-white' : 'text-gray-500 hover:bg-gray-50'
+              }`}
+            >
+              {d === 8 ? '.∞' : `.${d}`}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Currency row */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div className="flex-1">
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">Sumă</label>
+          <input
+            type="text"
+            inputMode="decimal"
+            value={amount}
+            onChange={e => setAmount(e.target.value)}
+            placeholder="0"
+            className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+          />
+        </div>
+        <div className="flex-1">
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">Din</label>
+          <select
+            value={fromCurrency}
+            onChange={e => setFromCurrency(e.target.value)}
+            className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+          >
+            {allOptions.map(v => (
+              <option key={v.valuta} value={v.valuta}>
+                {v.valuta}{CURRENCY_NAMES[v.valuta] ? ` — ${CURRENCY_NAMES[v.valuta]}` : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+        <button
+          type="button"
+          onClick={swap}
+          title="Inversează valutele"
+          className="self-end rounded-xl border border-gray-200 bg-white p-2.5 text-gray-400 transition hover:bg-gray-50 hover:text-gray-700"
+        >
+          <SwapIcon />
+        </button>
+        <div className="flex-1">
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">În</label>
+          <select
+            value={toCurrency}
+            onChange={e => setToCurrency(e.target.value)}
+            className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+          >
+            {allOptions.map(v => (
+              <option key={v.valuta} value={v.valuta}>
+                {v.valuta}{CURRENCY_NAMES[v.valuta] ? ` — ${CURRENCY_NAMES[v.valuta]}` : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* TVA row */}
+      <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div className="flex-1">
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">Cotă TVA</label>
+          <div className="flex flex-wrap items-center gap-1.5">
+            {TVA_PRESETS.map(r => (
+              <button
+                key={r.value}
+                type="button"
+                onClick={() => { setTvaPreset(r.value); setUseCustomTva(false) }}
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                  !useCustomTva && tvaPreset === r.value
+                    ? 'bg-amber-500 text-white'
+                    : 'border border-gray-200 text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                {r.label}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => setUseCustomTva(true)}
+              className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition ${
+                useCustomTva
+                  ? 'bg-amber-500 text-white'
+                  : 'border border-gray-200 text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              Altă cotă
+            </button>
+            {useCustomTva && (
+              <input
+                type="text"
+                inputMode="decimal"
+                value={customTva}
+                onChange={e => setCustomTva(e.target.value)}
+                placeholder="ex: 12"
+                className="w-20 rounded-lg border border-gray-200 bg-gray-50 px-2 py-1.5 text-xs outline-none focus:border-amber-500"
+              />
+            )}
+          </div>
+        </div>
+        <div className="shrink-0">
+          <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">Suma este</label>
+          <div className="flex overflow-hidden rounded-xl border border-gray-200 text-xs">
+            <button
+              type="button"
+              onClick={() => setIncludesTva(false)}
+              className={`px-4 py-2 font-semibold transition ${
+                !includesTva ? 'bg-amber-500 text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              Fără TVA
+            </button>
+            <button
+              type="button"
+              onClick={() => setIncludesTva(true)}
+              className={`px-4 py-2 font-semibold transition ${
+                includesTva ? 'bg-amber-500 text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              Cu TVA
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Results */}
+      {convertedAmount !== null && (
+        <div className="mt-5 space-y-3 rounded-xl bg-amber-50 p-4">
+          <div>
+            <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-amber-600">Conversie</p>
+            <p className="text-lg font-bold text-gray-900">
+              {fmt(amountNum)}{' '}
+              <span title={CURRENCY_NAMES[fromCurrency]} className="cursor-help">{fromCurrency}</span>
+              <span className="mx-2 text-base font-normal text-gray-400">=</span>
+              {fmt(convertedAmount)}{' '}
+              <span title={CURRENCY_NAMES[toCurrency]} className="cursor-help">{toCurrency}</span>
+            </p>
+          </div>
+
+          {tvaAmount !== null && !includesTva && (
+            <div className="space-y-1.5 border-t border-amber-100 pt-3">
+              <div className="flex items-baseline justify-between text-sm">
+                <span className="text-gray-500">TVA {effectiveTvaRate}%</span>
+                <span className="font-semibold text-amber-800">
+                  + {fmt(tvaAmount)}{' '}
+                  <span title={CURRENCY_NAMES[toCurrency]} className="cursor-help">{toCurrency}</span>
+                </span>
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="text-sm font-semibold text-gray-700">Total cu TVA</span>
+                <span className="text-lg font-bold text-green-700">
+                  {fmt(totalAmount!)}{' '}
+                  <span title={CURRENCY_NAMES[toCurrency]} className="cursor-help">{toCurrency}</span>
+                </span>
+              </div>
+            </div>
+          )}
+
+          {tvaAmount !== null && includesTva && (
+            <div className="space-y-1.5 border-t border-amber-100 pt-3">
+              <div className="flex items-baseline justify-between text-sm">
+                <span className="text-gray-500">Bază fără TVA</span>
+                <span className="font-semibold text-gray-800">
+                  {fmt(baseAmount!)}{' '}
+                  <span title={CURRENCY_NAMES[toCurrency]} className="cursor-help">{toCurrency}</span>
+                </span>
+              </div>
+              <div className="flex items-baseline justify-between text-sm">
+                <span className="text-gray-500">TVA inclus ({effectiveTvaRate}%)</span>
+                <span className="font-semibold text-amber-800">
+                  {fmt(tvaAmount)}{' '}
+                  <span title={CURRENCY_NAMES[toCurrency]} className="cursor-help">{toCurrency}</span>
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {valute.length === 0 && (
+        <p className="mt-4 text-xs text-gray-400">Se încarcă cursurile...</p>
+      )}
     </div>
   )
 }
 
-function ValutaCard({ info, onSelect }: { info: ValutaInfo; onSelect: (v: string) => void }) {
+function PrimaryRatesGrid({
+  valute,
+  loading,
+  onConvert,
+  tableRef,
+}: {
+  valute: ValutaInfo[]
+  loading: boolean
+  onConvert: (v: string) => void
+  tableRef: React.RefObject<HTMLDivElement>
+}) {
+  const primaryValute = PRIMARY_CURRENCIES
+    .map(code => valute.find(v => v.valuta === code))
+    .filter((v): v is ValutaInfo => v !== undefined)
+
   return (
-    <button
-      onClick={() => onSelect(info.valuta)}
-      className="flex flex-col rounded-xl border border-gray-100 bg-white p-5 shadow-sm text-left transition hover:border-amber-200 hover:shadow-md"
-    >
-      <div className="flex items-start justify-between mb-3">
-        <span className="rounded-lg bg-amber-50 px-2.5 py-1 font-mono text-sm font-bold text-amber-700">
-          {info.valuta}
-        </span>
-        <span className="text-xs text-gray-400">{formatDate(info.ultima_data)}</span>
-      </div>
-      <p className="text-xl font-bold text-gray-900">
-        {formatRate(info.curs_unitar)}
-        <span className="ml-1 text-sm font-normal text-gray-400">RON</span>
-      </p>
-    </button>
+    <div>
+      <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400">Cursuri principale</h2>
+      {loading ? (
+        <div className="grid grid-cols-2 gap-2.5">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <div key={i} className="h-20 animate-pulse rounded-xl bg-gray-100" />
+          ))}
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 gap-2.5">
+            {primaryValute.map(v => (
+              <button
+                key={v.valuta}
+                type="button"
+                onClick={() => onConvert(v.valuta)}
+                className="rounded-xl border border-gray-100 bg-white p-3 text-left shadow-sm transition hover:border-amber-200 hover:shadow-md"
+              >
+                <div className="mb-1.5 flex items-center justify-between">
+                  <span
+                    title={CURRENCY_NAMES[v.valuta]}
+                    className="cursor-help rounded-md bg-amber-50 px-2 py-0.5 font-mono text-xs font-bold text-amber-700"
+                  >
+                    {v.valuta}
+                  </span>
+                  <span className="text-xs text-gray-400">{formatDate(v.ultima_data)}</span>
+                </div>
+                <p className="text-sm font-bold text-gray-900">
+                  {formatNum(v.curs_unitar, 4)}
+                  <span className="ml-1 text-xs font-normal text-gray-400">RON</span>
+                </p>
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => tableRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+            className="mt-3 w-full rounded-xl border border-gray-100 bg-white py-2.5 text-xs font-medium text-gray-500 transition hover:bg-gray-50"
+          >
+            Vezi toate valutele ↓
+          </button>
+        </>
+      )}
+    </div>
   )
 }
 
-function CursZiResult({ cursZi, onBack }: { cursZi: CursZi; onBack: () => void }) {
+function SortIndicator({ active, dir }: { active: boolean; dir: SortDir }) {
   return (
-    <div className="rounded-2xl border border-amber-100 bg-amber-50 p-8">
-      <button
-        onClick={onBack}
-        className="mb-6 flex items-center gap-1.5 text-sm text-amber-600 hover:text-amber-800 transition"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <path d="m15 18-6-6 6-6" />
-        </svg>
-        Toate valutele
-      </button>
-      <div className="flex flex-wrap items-center gap-3 mb-6">
-        <span className="rounded-xl bg-amber-100 px-4 py-2 font-mono text-2xl font-bold text-amber-800">
-          {cursZi.valuta}
-        </span>
-        <span className="text-sm text-gray-500">{formatDate(cursZi.data)}</span>
+    <span className={`ml-1 ${active ? 'text-amber-500' : 'text-gray-300'}`}>
+      {active ? (dir === 'asc' ? '↑' : '↓') : '↕'}
+    </span>
+  )
+}
+
+function FullRatesTable({
+  valute,
+  loading,
+  onConvert,
+}: {
+  valute: ValutaInfo[]
+  loading: boolean
+  onConvert: (v: string) => void
+}) {
+  const [search, setSearch] = useState('')
+  const [sortKey, setSortKey] = useState<SortKey>('code')
+  const [sortDir, setSortDir] = useState<SortDir>('asc')
+  const [region, setRegion] = useState('Toate')
+
+  const regions = ['Toate', 'Europa', 'America', 'Asia', 'Pacific', 'Africa', 'Altele']
+
+  function getRegion(currency: string): string {
+    return CURRENCY_REGIONS[currency] ?? 'Altele'
+  }
+
+  function toggleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDir(d => (d === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortKey(key)
+      setSortDir('asc')
+    }
+  }
+
+  const filtered = valute
+    .filter(v => {
+      if (search && !v.valuta.toUpperCase().includes(search.toUpperCase())) return false
+      if (region !== 'Toate' && getRegion(v.valuta) !== region) return false
+      return true
+    })
+    .sort((a, b) => {
+      const cmp =
+        sortKey === 'code'
+          ? a.valuta.localeCompare(b.valuta)
+          : a.curs_unitar - b.curs_unitar
+      return sortDir === 'asc' ? cmp : -cmp
+    })
+
+  return (
+    <div>
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400">Toate valutele</h2>
+        <div className="flex flex-wrap gap-2">
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Caută valută..."
+            className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+          />
+          <select
+            value={region}
+            onChange={e => setRegion(e.target.value)}
+            className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+          >
+            {regions.map(r => (
+              <option key={r} value={r}>{r}</option>
+            ))}
+          </select>
+        </div>
       </div>
-      <div className="flex items-baseline gap-2 mb-2">
-        <span className="text-5xl font-bold tracking-tight text-gray-900">
-          {formatRate(cursZi.curs_unitar)}
-        </span>
-        <span className="text-xl text-gray-400">RON</span>
-      </div>
-      {cursZi.multiplicator > 1 && (
-        <p className="mt-2 text-sm text-gray-500">
-          {cursZi.multiplicator} {cursZi.valuta} = {formatRate(cursZi.curs)} RON
-        </p>
+
+      {loading ? (
+        <div className="space-y-2">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="h-10 animate-pulse rounded-lg bg-gray-100" />
+          ))}
+        </div>
+      ) : (
+        <div className="overflow-x-auto rounded-xl border border-gray-100">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-100 bg-gray-50 text-xs">
+                <th className="px-4 py-3 text-left">
+                  <button
+                    type="button"
+                    onClick={() => toggleSort('code')}
+                    className="font-semibold uppercase tracking-wider text-gray-400 hover:text-gray-700"
+                  >
+                    Valută
+                    <SortIndicator active={sortKey === 'code'} dir={sortDir} />
+                  </button>
+                </th>
+                <th className="px-4 py-3 text-right">
+                  <button
+                    type="button"
+                    onClick={() => toggleSort('rate')}
+                    className="font-semibold uppercase tracking-wider text-gray-400 hover:text-gray-700"
+                  >
+                    Curs BNR
+                    <SortIndicator active={sortKey === 'rate'} dir={sortDir} />
+                  </button>
+                </th>
+                <th className="hidden px-4 py-3 text-left font-semibold uppercase tracking-wider text-gray-400 sm:table-cell">
+                  Data
+                </th>
+                <th className="hidden px-4 py-3 text-left font-semibold uppercase tracking-wider text-gray-400 sm:table-cell">
+                  Regiune
+                </th>
+                <th className="px-4 py-3" />
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {filtered.map(v => (
+                <tr key={v.valuta} className="bg-white transition hover:bg-amber-50/30">
+                  <td className="px-4 py-2.5">
+                    <span
+                      title={CURRENCY_NAMES[v.valuta]}
+                      className="cursor-help rounded-md bg-amber-50 px-2 py-0.5 font-mono text-xs font-bold text-amber-700"
+                    >
+                      {v.valuta}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2.5 text-right font-mono font-semibold text-gray-900">
+                    {formatNum(v.curs_unitar, 4)}
+                    <span className="ml-1 text-xs font-normal text-gray-400">RON</span>
+                  </td>
+                  <td className="hidden px-4 py-2.5 text-sm text-gray-500 sm:table-cell">
+                    {formatDate(v.ultima_data)}
+                  </td>
+                  <td className="hidden px-4 py-2.5 text-sm text-gray-400 sm:table-cell">
+                    {getRegion(v.valuta)}
+                  </td>
+                  <td className="px-4 py-2.5">
+                    <button
+                      type="button"
+                      onClick={() => onConvert(v.valuta)}
+                      className="text-xs font-medium text-amber-600 transition hover:text-amber-800"
+                    >
+                      Convertire →
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-4 py-8 text-center text-sm text-gray-400">
+                    Nicio valută găsită.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {!loading && filtered.length > 0 && (
+        <p className="mt-2 text-xs text-gray-400">{filtered.length} valute afișate</p>
       )}
     </div>
   )
@@ -85,184 +594,99 @@ function CursZiResult({ cursZi, onBack }: { cursZi: CursZi; onBack: () => void }
 
 export function SchimbPage() {
   const [allValute, setAllValute] = useState<ValutaInfo[]>([])
-  const [displayValute, setDisplayValute] = useState<ValutaInfo[]>([])
-  const [selectedValuta, setSelectedValuta] = useState('')
   const [selectedDate, setSelectedDate] = useState(localToday())
-  const [cursZi, setCursZi] = useState<CursZi | null>(null)
-  const [isFiltered, setIsFiltered] = useState(false)
-  const [displayDate, setDisplayDate] = useState<string | null>(null)
-  const [loadingAll, setLoadingAll] = useState(true)
-  const [loadingResult, setLoadingResult] = useState(false)
-  const [errorAll, setErrorAll] = useState<string | null>(null)
-  const [errorResult, setErrorResult] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [convertTrigger, setConvertTrigger] = useState<ConvertTrigger>(null)
+
+  const converterRef = useRef<HTMLDivElement>(null)
+  const tableRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     getValute()
-      .then(data => {
-        setAllValute(data)
-        setDisplayValute(data)
-        setLoadingAll(false)
-      })
-      .catch(() => {
-        setErrorAll('Nu s-au putut încărca cursurile valutare.')
-        setLoadingAll(false)
-      })
+      .then(data => { setAllValute(data); setLoading(false) })
+      .catch(() => { setError('Nu s-au putut încărca cursurile valutare.'); setLoading(false) })
   }, [])
 
-  function handleSearch(e: React.FormEvent) {
-    e.preventDefault()
-    setLoadingResult(true)
-    setErrorResult(null)
-    setCursZi(null)
-    setIsFiltered(true)
-    setDisplayDate(selectedDate)
-
-    if (selectedValuta) {
-      getCursZi(selectedValuta, selectedDate)
-        .then(data => { setCursZi(data); setLoadingResult(false) })
-        .catch(() => { setErrorResult('Nu s-a găsit cursul pentru valuta și data selectate.'); setLoadingResult(false) })
-    } else {
-      getValuteByData(selectedDate)
-        .then(data => { setDisplayValute(data); setLoadingResult(false) })
-        .catch(() => { setErrorResult('Nu s-au putut încărca cursurile pentru data selectată.'); setLoadingResult(false) })
-    }
+  function handleRefresh() {
+    setLoading(true)
+    setError(null)
+    const request = selectedDate === localToday() ? getValute() : getValuteByData(selectedDate)
+    request
+      .then(data => { setAllValute(data); setLoading(false) })
+      .catch(() => { setError('Nu s-au putut încărca cursurile valutare.'); setLoading(false) })
   }
 
-  function handleReset() {
-    setSelectedValuta('')
-    setSelectedDate(localToday())
-    setCursZi(null)
-    setErrorResult(null)
-    setDisplayValute(allValute)
-    setIsFiltered(false)
-    setDisplayDate(null)
+  function handleConvert(currency: string) {
+    setConvertTrigger(prev => ({ currency, seq: (prev?.seq ?? 0) + 1 }))
+    converterRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
   }
 
-  function handleSelectCard(valuta: string) {
-    setSelectedValuta(valuta)
-    setLoadingResult(true)
-    setErrorResult(null)
-    setCursZi(null)
-    setIsFiltered(true)
-    getCursZi(valuta, selectedDate)
-      .then(data => { setCursZi(data); setLoadingResult(false) })
-      .catch(() => { setErrorResult('Nu s-a găsit cursul pentru valuta și data selectate.'); setLoadingResult(false) })
-  }
-
-  const showGrid = !cursZi && !loadingResult && !errorResult
+  const lastUpdate = allValute[0]?.ultima_data
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-      <div className="mb-10 text-center">
-        <h1 className="mb-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-          Curs Valutar BNR
-        </h1>
-        <p className="text-gray-500">
-          Cursuri oficiale de schimb față de RON publicate de Banca Națională a României
-        </p>
-      </div>
-
-      {/* Filter form */}
-      <form onSubmit={handleSearch} className="mb-8">
-        <div className="flex flex-col gap-3 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:flex-row sm:items-end">
-          <div className="flex-1">
-            <label htmlFor="valuta" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">
-              Valută
-            </label>
-            <select
-              id="valuta"
-              value={selectedValuta}
-              onChange={e => setSelectedValuta(e.target.value)}
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
-            >
-              <option value="">Toate valutele</option>
-              {allValute.map(v => (
-                <option key={v.valuta} value={v.valuta}>{v.valuta}</option>
-              ))}
-            </select>
-          </div>
-          <div className="flex-1">
-            <label htmlFor="data-curs" className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">
-              Dată
-            </label>
+    <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      {/* Header */}
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+            Curs valutar BNR și convertor TVA
+          </h1>
+          <p className="mt-1.5 text-gray-500">
+            Cursuri oficiale BNR pentru {formatDate(selectedDate) || selectedDate}.
+            Conversie valutară și calcul TVA într-un singur formular.
+          </p>
+        </div>
+        <div className="flex flex-col gap-2 sm:shrink-0 sm:items-end">
+          <div className="flex gap-2">
             <input
-              id="data-curs"
               type="date"
               value={selectedDate}
               max={localToday()}
               onChange={e => setSelectedDate(e.target.value)}
-              className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+              className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
             />
-          </div>
-          <div className="flex shrink-0 gap-2">
             <button
-              type="submit"
-              disabled={loadingResult}
-              className="rounded-xl bg-amber-500 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-40"
+              type="button"
+              onClick={handleRefresh}
+              disabled={loading}
+              className="rounded-xl bg-amber-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-amber-600 disabled:opacity-40"
             >
-              Caută
+              Actualizează
             </button>
-            {isFiltered && (
-              <button
-                type="button"
-                onClick={handleReset}
-                className="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
-              >
-                Resetează
-              </button>
-            )}
           </div>
+          {lastUpdate && (
+            <p className="text-xs text-gray-400">Ultima actualizare: {formatDate(lastUpdate)}</p>
+          )}
         </div>
-      </form>
+      </div>
 
-      {/* Initial skeleton */}
-      {loadingAll && <SkeletonGrid />}
-
-      {/* Error loading all */}
-      {!loadingAll && errorAll && (
-        <div className="rounded-xl border border-red-100 bg-red-50 px-6 py-10 text-center">
-          <p className="text-sm font-medium text-red-600">{errorAll}</p>
-        </div>
-      )}
-
-      {/* Loading result */}
-      {loadingResult && (
-        <div className="h-44 animate-pulse rounded-2xl bg-gray-100" />
-      )}
-
-      {/* Error result */}
-      {!loadingResult && errorResult && (
-        <div className="rounded-xl border border-red-100 bg-red-50 px-6 py-10 text-center">
-          <p className="text-sm font-medium text-red-600">{errorResult}</p>
-          <button onClick={handleReset} className="mt-4 text-sm text-red-500 underline hover:text-red-700">
-            Înapoi la toate valutele
-          </button>
+      {/* Error */}
+      {error && (
+        <div className="mb-6 rounded-xl border border-red-100 bg-red-50 px-6 py-4 text-sm font-medium text-red-600">
+          {error}
         </div>
       )}
 
-      {/* Single currency result */}
-      {!loadingResult && cursZi && (
-        <CursZiResult cursZi={cursZi} onBack={handleReset} />
-      )}
+      {/* Main 2-col layout */}
+      <div className="mb-10 grid gap-6 lg:grid-cols-[1fr_300px]">
+        <ConvertorCard
+          valute={allValute}
+          trigger={convertTrigger}
+          converterRef={converterRef}
+        />
+        <PrimaryRatesGrid
+          valute={allValute}
+          loading={loading}
+          onConvert={handleConvert}
+          tableRef={tableRef}
+        />
+      </div>
 
-      {/* All currencies grid */}
-      {!loadingAll && !errorAll && showGrid && (
-        <>
-          <p className="mb-4 text-sm text-gray-400">
-            {displayValute.length} valute
-            {isFiltered && displayDate && (
-              <span> — {formatDate(displayDate)}</span>
-            )}
-            {!isFiltered && ' disponibile'}
-            {!cursZi && ' — click pe o valută pentru detalii'}
-          </p>
-          <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {displayValute.map(v => (
-              <ValutaCard key={v.valuta} info={v} onSelect={handleSelectCard} />
-            ))}
-          </div>
-        </>
-      )}
+      {/* Full rates table */}
+      <div ref={tableRef}>
+        <FullRatesTable valute={allValute} loading={loading} onConvert={handleConvert} />
+      </div>
     </main>
   )
 }
