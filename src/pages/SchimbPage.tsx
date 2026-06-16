@@ -105,7 +105,7 @@ function ConvertorCard({
 }: {
   valute: ValutaInfo[]
   trigger: ConvertTrigger
-  converterRef: React.RefObject<HTMLDivElement>
+  converterRef: React.RefObject<HTMLDivElement | null>
 }) {
   const [amount, setAmount] = useState('100')
   const [fromCurrency, setFromCurrency] = useState('EUR')
@@ -373,7 +373,7 @@ function PrimaryRatesGrid({
   valute: ValutaInfo[]
   loading: boolean
   onConvert: (v: string) => void
-  tableRef: React.RefObject<HTMLDivElement>
+  tableRef: React.RefObject<HTMLDivElement | null>
 }) {
   const primaryValute = PRIMARY_CURRENCIES
     .map(code => valute.find(v => v.valuta === code))

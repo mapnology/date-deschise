@@ -42,13 +42,14 @@ export function FirmaDetailPage() {
 
   useEffect(() => {
     if (!cui) return
+    const cuiValue = cui
     let cancelled = false
 
     async function load() {
       setLoading(true)
       setError(null)
       try {
-        const data = await getCompanie(cui)
+        const data = await getCompanie(cuiValue)
         if (!cancelled) setCompany(data)
       } catch {
         if (!cancelled) setError('Firma nu a putut fi încărcată. Verifică CUI-ul și încearcă din nou.')
