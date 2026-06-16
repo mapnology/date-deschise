@@ -7,6 +7,11 @@ export interface CompanySearchItem {
   similarity: number
 }
 
+export interface CompanySearchResponse {
+  total: number
+  results: CompanySearchItem[]
+}
+
 export interface CompanyOut {
   name: string
   cui: number
