@@ -648,15 +648,15 @@ function SirutaDocsSection() {
 
 export function DocsPage() {
   return (
-    <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-      <div className="mb-10">
-        <h1 className="mb-2 text-3xl font-bold tracking-tight text-gray-900">
+    <main id="docs-page" className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
+      <div id="docs-header" className="mb-10">
+        <h1 id="docs-title" className="mb-2 text-3xl font-bold tracking-tight text-gray-900">
           Documentație API
         </h1>
-        <p className="text-gray-500">
+        <p id="docs-subtitle" className="text-gray-500">
           API-uri REST gratuite pentru date publice din România. Toate endpoint-urile returnează JSON, iar documentația de mai jos acoperă rutele folosite în frontend.
         </p>
-        <div className="mt-4 flex flex-wrap items-center gap-2 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3">
+        <div id="docs-base-url" className="mt-4 flex flex-wrap items-center gap-2 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3">
           <span className="text-sm font-semibold text-gray-600">Base URL</span>
           <code className="ml-2 font-mono text-sm text-gray-800">https://caen-api.ro/api</code>
           <a
@@ -670,7 +670,7 @@ export function DocsPage() {
         </div>
 
         {/* Section nav */}
-        <div className="mt-5 flex gap-2">
+        <div id="docs-nav" className="mt-5 flex gap-2">
           <a
             href="#caen"
             className="flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-4 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"

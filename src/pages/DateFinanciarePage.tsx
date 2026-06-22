@@ -72,7 +72,7 @@ export function DateFinanciarePage() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
+    <main id="date-financiare-page" className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight text-gray-900">Date Financiare Firme</h1>
         <p className="mt-1.5 text-sm text-gray-500">

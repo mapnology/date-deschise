@@ -166,9 +166,9 @@ function ConvertorCard({
   const fmt = (n: number) => formatNum(n, decimals)
 
   return (
-    <div ref={converterRef} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+    <div id="convertor-card" ref={converterRef} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
       <div className="mb-5 flex items-center justify-between">
-        <h2 className="text-base font-semibold text-gray-800">Convertor valutar + TVA</h2>
+        <h2 id="convertor-title" className="text-base font-semibold text-gray-800">Convertor valutar + TVA</h2>
         <div className="flex overflow-hidden rounded-lg border border-gray-200 text-xs">
           {([2, 4, 8] as const).map(d => (
             <button
@@ -190,6 +190,7 @@ function ConvertorCard({
         <div className="flex-1">
           <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">Sumă</label>
           <input
+            id="convertor-amount"
             type="text"
             inputMode="decimal"
             value={amount}
@@ -201,6 +202,7 @@ function ConvertorCard({
         <div className="flex-1">
           <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">Din</label>
           <select
+            id="convertor-from"
             value={fromCurrency}
             onChange={e => setFromCurrency(e.target.value)}
             className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
@@ -213,6 +215,7 @@ function ConvertorCard({
           </select>
         </div>
         <button
+          id="convertor-swap"
           type="button"
           onClick={swap}
           title="Inversează valutele"
@@ -223,6 +226,7 @@ function ConvertorCard({
         <div className="flex-1">
           <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">În</label>
           <select
+            id="convertor-to"
             value={toCurrency}
             onChange={e => setToCurrency(e.target.value)}
             className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
@@ -237,7 +241,7 @@ function ConvertorCard({
       </div>
 
       {/* TVA row */}
-      <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end">
+      <div id="convertor-tva" className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="flex-1">
           <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">Cotă TVA</label>
           <div className="flex flex-wrap items-center gap-1.5">
@@ -305,7 +309,7 @@ function ConvertorCard({
 
       {/* Results */}
       {convertedAmount !== null && (
-        <div className="mt-5 space-y-3 rounded-xl bg-amber-50 p-4">
+        <div id="convertor-result" className="mt-5 space-y-3 rounded-xl bg-amber-50 p-4">
           <div>
             <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-amber-600">Conversie</p>
             <p className="text-lg font-bold text-gray-900">
@@ -380,7 +384,7 @@ function PrimaryRatesGrid({
     .filter((v): v is ValutaInfo => v !== undefined)
 
   return (
-    <div>
+    <div id="rates-grid">
       <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400">Cursuri principale</h2>
       {loading ? (
         <div className="grid grid-cols-2 gap-2.5">
@@ -479,11 +483,12 @@ function FullRatesTable({
     })
 
   return (
-    <div>
+    <div id="rates-table">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400">Toate valutele</h2>
         <div className="flex flex-wrap gap-2">
           <input
+            id="rates-search"
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -491,6 +496,7 @@ function FullRatesTable({
             className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
           />
           <select
+            id="rates-region"
             value={region}
             onChange={e => setRegion(e.target.value)}
             className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
@@ -625,14 +631,14 @@ export function SchimbPage() {
   const lastUpdate = allValute[0]?.ultima_data
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+    <main id="schimb-page" className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       {/* Header */}
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div id="schimb-header" className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+          <h1 id="schimb-title" className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
             Curs valutar BNR și convertor TVA
           </h1>
-          <p className="mt-1.5 text-gray-500">
+          <p id="schimb-subtitle" className="mt-1.5 text-gray-500">
             Cursuri oficiale BNR pentru {formatDate(selectedDate) || selectedDate}.
             Conversie valutară și calcul TVA într-un singur formular.
           </p>
@@ -640,6 +646,7 @@ export function SchimbPage() {
         <div className="flex flex-col gap-2 sm:shrink-0 sm:items-end">
           <div className="flex gap-2">
             <input
+              id="schimb-date"
               type="date"
               value={selectedDate}
               max={localToday()}
@@ -647,6 +654,7 @@ export function SchimbPage() {
               className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
             />
             <button
+              id="schimb-refresh"
               type="button"
               onClick={handleRefresh}
               disabled={loading}
@@ -663,13 +671,13 @@ export function SchimbPage() {
 
       {/* Error */}
       {error && (
-        <div className="mb-6 rounded-xl border border-red-100 bg-red-50 px-6 py-4 text-sm font-medium text-red-600">
+        <div id="schimb-error" className="mb-6 rounded-xl border border-red-100 bg-red-50 px-6 py-4 text-sm font-medium text-red-600">
           {error}
         </div>
       )}
 
       {/* Main 2-col layout */}
-      <div className="mb-10 grid gap-6 lg:grid-cols-[1fr_300px]">
+      <div id="schimb-layout" className="mb-10 grid gap-6 lg:grid-cols-[1fr_300px]">
         <ConvertorCard
           valute={allValute}
           trigger={convertTrigger}

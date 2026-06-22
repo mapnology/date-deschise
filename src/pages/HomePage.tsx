@@ -279,29 +279,29 @@ export function HomePage() {
   }, [])
 
   return (
-    <main>
+    <main id="home-page">
       {/* Hero */}
-      <section className="border-b border-gray-100 bg-white px-4 py-20 text-center">
+      <section id="home-hero" className="border-b border-gray-100 bg-white px-4 py-20 text-center">
         <div className="mx-auto max-w-2xl">
           <span className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
             <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
             Date Deschise
           </span>
-          <h1 className="mb-4 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+          <h1 id="home-title" className="mb-4 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
             Date Deschise România
           </h1>
-          <p className="text-lg text-gray-500">
+          <p id="home-subtitle" className="text-lg text-gray-500">
             API-uri gratuite cu date publice din România
           </p>
         </div>
       </section>
 
       {/* API Services grid */}
-      <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
-        <div className="mb-12">
+      <section id="home-services" className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+        <div id="home-services-live" className="mb-12">
           <div className="mb-8 flex items-center justify-between gap-4">
             <div>
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-400">
+              <h2 id="home-services-live-title" className="text-sm font-semibold uppercase tracking-wider text-gray-400">
                 Disponibile acum
               </h2>
               <p className="mt-2 text-sm text-gray-500">
@@ -309,17 +309,17 @@ export function HomePage() {
               </p>
             </div>
           </div>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div id="home-services-live-grid" className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {LIVE_SERVICES.map(service => (
               <ServiceCard key={service.id} service={service} onComingSoon={handleComingSoon} />
             ))}
           </div>
         </div>
 
-        <div>
+        <div id="home-services-coming-soon">
           <div className="mb-8 flex items-center justify-between gap-4 border-t border-gray-100 pt-10">
             <div>
-              <h2 className="text-sm font-semibold uppercase tracking-wider text-gray-400">
+              <h2 id="home-services-coming-soon-title" className="text-sm font-semibold uppercase tracking-wider text-gray-400">
                 În pregătire
               </h2>
               <p className="mt-2 text-sm text-gray-500">
@@ -327,7 +327,7 @@ export function HomePage() {
               </p>
             </div>
           </div>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div id="home-services-coming-soon-grid" className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {COMING_SOON_SERVICES.map(service => (
               <ServiceCard key={service.id} service={service} onComingSoon={handleComingSoon} />
             ))}

@@ -63,8 +63,9 @@ export function FirmaDetailPage() {
   }, [cui])
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
+    <main id="firma-detail-page" className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
       <Link
+        id="firma-detail-back"
         to="/firme"
         className="mb-8 inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-800"
       >
@@ -84,7 +85,7 @@ export function FirmaDetailPage() {
       )}
 
       {error && (
-        <div className="rounded-xl border border-red-100 bg-red-50 px-5 py-4 text-sm text-red-700">
+        <div id="firma-detail-error" className="rounded-xl border border-red-100 bg-red-50 px-5 py-4 text-sm text-red-700">
           {error}
         </div>
       )}
@@ -92,9 +93,9 @@ export function FirmaDetailPage() {
       {company && (
         <div className="space-y-6">
           {/* Header */}
-          <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+          <div id="firma-detail-header" className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
             <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-              <span className="rounded-lg bg-indigo-50 px-3 py-1.5 font-mono text-sm font-semibold text-indigo-700">
+              <span id="firma-detail-cui" className="rounded-lg bg-indigo-50 px-3 py-1.5 font-mono text-sm font-semibold text-indigo-700">
                 CUI {company.cui}
               </span>
               {company.registration_number && (
@@ -103,7 +104,7 @@ export function FirmaDetailPage() {
                 </span>
               )}
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+            <h1 id="firma-detail-name" className="text-2xl font-bold tracking-tight text-gray-900">
               {company.name}
             </h1>
             {company.legal_form && (
@@ -125,7 +126,7 @@ export function FirmaDetailPage() {
           </div>
 
           {/* General info */}
-          <section className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+          <section id="firma-detail-info" className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-400">
               Informații generale
             </h2>
@@ -153,7 +154,7 @@ export function FirmaDetailPage() {
           </section>
 
           {/* Address */}
-          <section className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+          <section id="firma-detail-adresa" className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
             <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-400">
               Adresă
             </h2>
