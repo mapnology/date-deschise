@@ -11,6 +11,7 @@ import { DocsPage } from './pages/DocsPage'
 import { AboutPage } from './pages/AboutPage'
 import { FirmePage } from './pages/FirmePage'
 import { FirmaDetailPage } from './pages/FirmaDetailPage'
+import { DateFinanciarePage } from './pages/DateFinanciarePage'
 
 const PAGE_TITLES: Record<string, string> = {
   '/': 'Date Deschise',
@@ -19,6 +20,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/schimb': 'Curs Valutar BNR',
   '/zile-libere': 'Zile Libere & Idei de Concediu',
   '/firme': 'Căutare Firme',
+  '/date-financiare': 'Date Financiare Firme',
   '/documentatie': 'Documentație API',
   '/despre': 'Despre proiect',
 }
@@ -47,6 +49,7 @@ export default function App() {
             <Route path="/zile-libere" element={<ZileLiberePage />} />
             <Route path="/firme" element={<FirmePage />} />
             <Route path="/firme/:cui" element={<FirmaDetailPage />} />
+            <Route path="/date-financiare" element={<DateFinanciarePage />} />
             <Route path="/documentatie" element={<DocsPage />} />
             <Route path="/despre" element={<AboutPage />} />
           </Routes>

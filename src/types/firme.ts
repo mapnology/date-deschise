@@ -12,6 +12,25 @@ export interface CompanySearchResponse {
   results: CompanySearchItem[]
 }
 
+export interface BilantIndicator {
+  label: string
+  value: number
+}
+
+export interface BilantYear {
+  year: number
+  indicators: BilantIndicator[]
+}
+
+export interface BilantResponse {
+  cui: number
+  name: string
+  caen_code: number
+  caen_label: string
+  years: BilantYear[]
+  warning: string | null
+}
+
 export interface CompanyOut {
   name: string
   cui: number
