@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react'
+import { Link } from 'react-router-dom'
 import { searchCompanii, getCompanie } from '../services/firmeApi'
 import type { CompanyOut } from '../types/firme'
 
@@ -53,6 +54,18 @@ function CompanyDetail({ company }: { company: CompanyOut }) {
         {company.legal_form && (
           <p className="mt-1 text-sm text-gray-500">{company.legal_form}</p>
         )}
+        <div className="mt-5 border-t border-gray-100 pt-4">
+          <Link
+            to={`/date-financiare?cui=${company.cui}`}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-teal-50 px-4 py-2 text-sm font-medium text-teal-700 transition hover:bg-teal-100"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 3v18h18" />
+              <path d="m19 9-5 5-4-4-3 3" />
+            </svg>
+            Date financiare
+          </Link>
+        </div>
       </div>
 
       <section className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">

@@ -1,4 +1,5 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { getBilant } from '../services/firmeApi'
 import type { BilantResponse } from '../types/firme'
 
@@ -27,18 +28,17 @@ function BilantYearSection({ year, indicators }: { year: number; indicators: { l
 }
 
 export function DateFinanciarePage() {
-  const [cui, setCui] = useState('')
+  const [searchParams] = useSearchParams()
+  const initialCui = searchParams.get('cui') ?? ''
+
+  const [cui, setCui] = useState(initialCui)
   const [an, setAn] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<BilantResponse | null>(null)
   const abortRef = useRef<AbortController | null>(null)
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    const cuiTrimmed = cui.trim()
-    if (!cuiTrimmed) return
-
+  async function fetchBilant(cuiValue: string, anValue: string) {
     abortRef.current?.abort()
     abortRef.current = new AbortController()
 
@@ -47,14 +47,28 @@ export function DateFinanciarePage() {
     setResult(null)
 
     try {
-      const ani = an.trim() ? [parseInt(an.trim(), 10)] : undefined
-      const data = await getBilant(cuiTrimmed, ani)
+      const ani = anValue.trim() ? [parseInt(anValue.trim(), 10)] : undefined
+      const data = await getBilant(cuiValue, ani)
       setResult(data)
     } catch {
       setError('Nu s-au putut obține datele financiare. Verifică CUI-ul și încearcă din nou.')
     } finally {
       setLoading(false)
     }
+  }
+
+  useEffect(() => {
+    if (initialCui) {
+      void fetchBilant(initialCui, '')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    const cuiTrimmed = cui.trim()
+    if (!cuiTrimmed) return
+    void fetchBilant(cuiTrimmed, an)
   }
 
   return (
@@ -66,14 +80,14 @@ export function DateFinanciarePage() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="mb-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+      <form id="date-financiare-form" onSubmit={handleSubmit} className="mb-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
           <div className="flex-1">
-            <label htmlFor="cui" className="mb-1.5 block text-sm font-medium text-gray-700">
+            <label htmlFor="df-cui" className="mb-1.5 block text-sm font-medium text-gray-700">
               CUI
             </label>
             <input
-              id="cui"
+              id="df-cui"
               type="text"
               inputMode="numeric"
               value={cui}
@@ -84,11 +98,11 @@ export function DateFinanciarePage() {
             />
           </div>
           <div className="w-32">
-            <label htmlFor="an" className="mb-1.5 block text-sm font-medium text-gray-700">
+            <label htmlFor="df-an" className="mb-1.5 block text-sm font-medium text-gray-700">
               An (opțional)
             </label>
             <input
-              id="an"
+              id="df-an"
               type="text"
               inputMode="numeric"
               value={an}
@@ -98,6 +112,7 @@ export function DateFinanciarePage() {
             />
           </div>
           <button
+            id="df-submit"
             type="submit"
             disabled={loading || !cui.trim()}
             className="inline-flex h-[42px] items-center justify-center gap-2 rounded-lg bg-teal-600 px-5 text-sm font-medium text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-50"
@@ -114,14 +129,14 @@ export function DateFinanciarePage() {
       </form>
 
       {error && (
-        <div className="mb-6 rounded-xl border border-red-100 bg-red-50 px-5 py-4 text-sm text-red-700">
+        <div id="df-error" className="mb-6 rounded-xl border border-red-100 bg-red-50 px-5 py-4 text-sm text-red-700">
           {error}
         </div>
       )}
 
       {result && (
-        <div className="space-y-5">
-          <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+        <div id="df-result" className="space-y-5">
+          <div id="df-result-header" className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
             <span className="mb-3 inline-block rounded-lg bg-teal-50 px-3 py-1.5 font-mono text-sm font-semibold text-teal-700">
               CUI {result.cui}
             </span>
