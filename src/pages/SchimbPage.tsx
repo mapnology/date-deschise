@@ -6,7 +6,7 @@ const PRIMARY_CURRENCIES = ['EUR', 'USD', 'GBP', 'CHF', 'CAD', 'AUD', 'JPY', 'HU
 
 const TVA_PRESETS: { label: string; value: number }[] = [
   { label: '0%', value: 0 },
-  { label: '11', value: 11 },
+  { label: '11%', value: 11 },
   { label: '21%', value: 21 },
 ]
 
