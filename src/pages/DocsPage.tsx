@@ -644,6 +644,202 @@ function SirutaDocsSection() {
   )
 }
 
+// ─── CONVERSIE CAEN v2/v3 ───────────────────────────────────────────────────
+
+const CAEN_V2_LOOKUP_FETCH = `const res = await fetch('https://caen-api.ro/api/caen/v2/6202');
+const data = await res.json();
+// { cod: "6202", denumire: "...", corespondente: [{ cod_v3: "6220", ... }] }`
+
+const CAEN_V2_LOOKUP_CURL = `curl "https://caen-api.ro/api/caen/v2/6202"`
+
+const CAEN_V3_PREDECESORI_FETCH = `const res = await fetch('https://caen-api.ro/api/caen/v3/4791/v2');
+const data = await res.json();
+// { cod: "4791", denumire: "...", predecesori: [{ cod_v2: "4711", ... }, ...] }`
+
+const CAEN_V3_PREDECESORI_CURL = `curl "https://caen-api.ro/api/caen/v3/4791/v2"`
+
+const CAEN_CORESPONDENTA_FETCH = `const res = await fetch('https://caen-api.ro/api/caen/corespondenta?v2=4711&limit=20');
+const data = await res.json();
+// { total: 2, results: [{ id: 512, cod_v2: "4711", cod_v3: "4711", ... }, ...] }`
+
+const CAEN_CORESPONDENTA_CURL = `curl "https://caen-api.ro/api/caen/corespondenta?v2=4711&limit=20"`
+
+const CAEN_V2_LOOKUP_RESPONSE = `{
+  "cod": "6202",
+  "denumire": "Activităţi de consultanţă în tehnologia informaţiei",
+  "corespondente": [
+    {
+      "cod_v3": "6220",
+      "denumire_v3": "Activităţi de consultanţă în tehnologia informaţiei și de management (gestiune şi exploatare) a mijloacelor de calcul",
+      "tip_corespondenta": "AGREGARE"
+    }
+  ]
+}`
+
+const CAEN_V3_PREDECESORI_RESPONSE = `{
+  "cod": "4791",
+  "denumire": "Intermedieri în comerţul cu amănuntul nespecializat",
+  "predecesori": [
+    {
+      "cod_v2": "4711",
+      "denumire_v2": "Comerţ cu amănuntul în magazine nespecializate, cu vânzare predominantă de produse alimentare, băuturi şi tutun",
+      "tip_corespondenta": "MIXT"
+    },
+    {
+      "cod_v2": "4719",
+      "denumire_v2": "Comerţ cu amănuntul în magazine nespecializate, cu vânzare predominantă de produse nealimentare",
+      "tip_corespondenta": "MIXT"
+    }
+  ]
+}`
+
+const CAEN_CORESPONDENTA_RESPONSE = `{
+  "total": 2,
+  "results": [
+    {
+      "id": 512,
+      "cod_v2": "4711",
+      "denumire_v2": "Comerţ cu amănuntul în magazine nespecializate, cu vânzare predominantă de produse alimentare, băuturi şi tutun",
+      "cod_v3": "4711",
+      "denumire_v3": "Comerţ cu amănuntul nespecializat, cu vânzare predominantă de produse alimentare, băuturi şi tutun",
+      "tip_corespondenta": "MIXT"
+    },
+    {
+      "id": 513,
+      "cod_v2": "4711",
+      "denumire_v2": "Comerţ cu amănuntul în magazine nespecializate, cu vânzare predominantă de produse alimentare, băuturi şi tutun",
+      "cod_v3": "4791",
+      "denumire_v3": "Intermedieri în comerţul cu amănuntul nespecializat",
+      "tip_corespondenta": "MIXT"
+    }
+  ]
+}`
+
+function ConversieCAENDocsSection() {
+  return (
+    <section id="conversie-caen">
+      <div className="mb-8 flex items-center gap-3">
+        <span className="rounded-xl bg-blue-50 px-3 py-1.5 font-mono text-sm font-bold text-blue-700">CAEN v2 ↔ v3</span>
+        <h2 className="text-xl font-bold text-gray-900">Corespondență CAEN Rev. 2 – Rev. 3</h2>
+      </div>
+
+      <div className="space-y-10">
+        <div>
+          <EndpointHeader method="GET" path="/caen/v2/{cod}" accent="blue" />
+          <p className="mb-5 text-gray-600">
+            Returnează detaliile unei clase CAEN Rev. 2 împreună cu toate codurile CAEN Rev. 3 corespunzătoare.
+          </p>
+          <SectionLabel label="Parametri" />
+          <ParamsTable>
+            <ParamRow name="cod" type="string" required description="Codul CAEN Rev. 2 (2-4 cifre, ex: 6202)." />
+          </ParamsTable>
+          <SectionLabel label="Exemple" />
+          <div className="space-y-3">
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-gray-500">JavaScript (fetch)</p>
+              <CodeBlock code={CAEN_V2_LOOKUP_FETCH} language="javascript" />
+            </div>
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-gray-500">cURL</p>
+              <CodeBlock code={CAEN_V2_LOOKUP_CURL} />
+            </div>
+          </div>
+          <SectionLabel label="Răspuns" />
+          <CodeBlock code={CAEN_V2_LOOKUP_RESPONSE} language="json" />
+        </div>
+
+        <hr className="border-gray-100" />
+
+        <div>
+          <EndpointHeader method="GET" path="/caen/v3/{cod}/v2" accent="blue" />
+          <p className="mb-5 text-gray-600">
+            Returnează codurile CAEN Rev. 2 care corespund unui cod CAEN Rev. 3 dat (predecesorii săi).
+          </p>
+          <SectionLabel label="Parametri" />
+          <ParamsTable>
+            <ParamRow name="cod" type="string" required description="Codul CAEN Rev. 3 (2-4 cifre, ex: 4791)." />
+          </ParamsTable>
+          <SectionLabel label="Exemple" />
+          <div className="space-y-3">
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-gray-500">JavaScript (fetch)</p>
+              <CodeBlock code={CAEN_V3_PREDECESORI_FETCH} language="javascript" />
+            </div>
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-gray-500">cURL</p>
+              <CodeBlock code={CAEN_V3_PREDECESORI_CURL} />
+            </div>
+          </div>
+          <SectionLabel label="Răspuns" />
+          <CodeBlock code={CAEN_V3_PREDECESORI_RESPONSE} language="json" />
+        </div>
+
+        <hr className="border-gray-100" />
+
+        <div>
+          <EndpointHeader method="GET" path="/caen/corespondenta" accent="blue" />
+          <p className="mb-5 text-gray-600">
+            Caută înregistrări de corespondență CAEN Rev. 2 ↔ Rev. 3 după cod și/sau tip de corespondență. Suportă paginare.
+          </p>
+          <SectionLabel label="Parametri" />
+          <ParamsTable>
+            <ParamRow name="v2" type="string" required={false} description="Filtrează după codul CAEN Rev. 2 (2-4 cifre)." />
+            <ParamRow name="v3" type="string" required={false} description="Filtrează după codul CAEN Rev. 3 (2-4 cifre)." />
+            <ParamRow name="tip" type="string" required={false} description="Filtrează după tipul de corespondență (ex: NESCHIMBAT, RECODIFICARE, AGREGARE, MIXT)." />
+            <ParamRow name="limit" type="integer" required={false} description="Număr maxim de rezultate. Implicit 50, maxim 200." />
+            <ParamRow name="offset" type="integer" required={false} description="Poziția de start pentru paginare. Implicit 0." />
+          </ParamsTable>
+          <SectionLabel label="Exemple" />
+          <div className="space-y-3">
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-gray-500">JavaScript (fetch)</p>
+              <CodeBlock code={CAEN_CORESPONDENTA_FETCH} language="javascript" />
+            </div>
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-gray-500">cURL</p>
+              <CodeBlock code={CAEN_CORESPONDENTA_CURL} />
+            </div>
+          </div>
+          <SectionLabel label="Răspuns" />
+          <CodeBlock code={CAEN_CORESPONDENTA_RESPONSE} language="json" />
+        </div>
+
+        <hr className="border-gray-100" />
+
+        <div>
+          <h3 className="mb-4 text-base font-bold text-gray-900">Tipuri de corespondență (<code className="rounded bg-blue-50 px-2 py-0.5 font-mono text-sm text-blue-700">tip_corespondenta</code>)</h3>
+          <div className="overflow-x-auto rounded-xl border border-gray-100 bg-white px-4">
+            <table className="w-full">
+              <thead>
+                <tr>
+                  <th className="py-2.5 pr-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Valoare</th>
+                  <th className="py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Descriere</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ['NESCHIMBAT', 'Codul a rămas identic din Rev. 2 în Rev. 3 (cod păstrat).'],
+                  ['RECODIFICARE', 'Codul a fost renumerotat, corespondența fiind directă (1:1).'],
+                  ['AGREGARE', 'Mai multe coduri Rev. 2 au fost reunite într-un singur cod Rev. 3.'],
+                  ['MIXT', 'Corespondență parțială/amestecată; activitatea efectivă trebuie verificată pentru alegerea codului corect.'],
+                ].map(([tip, desc]) => (
+                  <tr key={tip} className="border-t border-gray-100">
+                    <td className="py-2.5 pr-4 font-mono text-sm font-medium text-blue-700">{tip}</td>
+                    <td className="py-2.5 text-sm text-gray-600">{desc}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-3 text-sm text-gray-500">
+            Un cod CAEN Rev. 2 poate corespunde mai multor coduri CAEN Rev. 3 (cod împărțit în mai multe activități) — în acest caz, codul corect trebuie ales în funcție de activitatea desfășurată efectiv, nu presupus automat din prima corespondență returnată.
+          </p>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 // ─── FIRME ───────────────────────────────────────────────────────────────────
 
 const FIRME_SEARCH_FETCH = `const res = await fetch('https://caen-api.ro/api/companii/search?q=OMV+Petrom&limit=5');
@@ -1011,6 +1207,12 @@ export function DocsPage() {
             <span className="text-blue-400">Rev. 3</span>
           </a>
           <a
+            href="#conversie-caen"
+            className="flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-4 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
+          >
+            <span className="font-mono">CAEN v2 ↔ v3</span>
+          </a>
+          <a
             href="#siruta"
             className="flex items-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
           >
@@ -1041,6 +1243,8 @@ export function DocsPage() {
 
       <div className="space-y-16">
         <CAENDocsSection />
+        <hr className="border-gray-200" />
+        <ConversieCAENDocsSection />
         <hr className="border-gray-200" />
         <SirutaDocsSection />
         <hr className="border-gray-200" />
