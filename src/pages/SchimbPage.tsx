@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
-import { getValute, getValuteByData } from '../services/schimbApi'
-import type { ValutaInfo } from '../types/schimb'
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { getValute, getValuteByData, getIstoricCurs } from '../services/schimbApi'
+import type { ValutaInfo, CursIstoricPunct } from '../types/schimb'
 
 const PRIMARY_CURRENCIES = ['EUR', 'USD', 'GBP', 'CHF', 'CAD', 'AUD', 'JPY', 'HUF', 'BGN', 'MDL']
 
@@ -76,6 +77,12 @@ function localToday(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
+function dateNDaysAgo(n: number): string {
+  const d = new Date()
+  d.setDate(d.getDate() - n)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 function formatDate(dateStr: string | undefined | null): string {
   if (!dateStr) return ''
   const [y, m, d] = dateStr.split('-')
@@ -102,10 +109,12 @@ function ConvertorCard({
   valute,
   trigger,
   converterRef,
+  onFromCurrencyChange,
 }: {
   valute: ValutaInfo[]
   trigger: ConvertTrigger
   converterRef: React.RefObject<HTMLDivElement | null>
+  onFromCurrencyChange: (currency: string) => void
 }) {
   const [amount, setAmount] = useState('100')
   const [fromCurrency, setFromCurrency] = useState('EUR')
@@ -122,6 +131,10 @@ function ConvertorCard({
       setToCurrency('RON')
     }
   }, [trigger])
+
+  useEffect(() => {
+    onFromCurrencyChange(fromCurrency)
+  }, [fromCurrency, onFromCurrencyChange])
 
   const allOptions = [{ valuta: 'RON', curs_unitar: 1, ultima_data: '' } as ValutaInfo, ...valute]
 
@@ -368,6 +381,126 @@ function ConvertorCard({
   )
 }
 
+const CHART_PERIODS: { label: string; days: number }[] = [
+  { label: '7 zile', days: 7 },
+  { label: '30 zile', days: 30 },
+  { label: '90 zile', days: 90 },
+  { label: '1 an', days: 365 },
+]
+
+function RatesChartSection({ valuta }: { valuta: string }) {
+  const [periodDays, setPeriodDays] = useState(7)
+  const [data, setData] = useState<CursIstoricPunct[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setLoading(true)
+    setError(null)
+    getIstoricCurs(valuta, dateNDaysAgo(periodDays), localToday())
+      .then(d => { setData(d); setLoading(false) })
+      .catch(() => { setError('Nu s-a putut încărca evoluția cursului.'); setLoading(false) })
+  }, [valuta, periodDays])
+
+  const latest = data[data.length - 1]
+
+  return (
+    <div id="rates-chart" className="mb-10 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400">Evoluție curs</h2>
+          <p className="mt-1 flex items-baseline gap-2">
+            <span
+              title={CURRENCY_NAMES[valuta]}
+              className="cursor-help rounded-md bg-amber-50 px-2 py-0.5 font-mono text-xs font-bold text-amber-700"
+            >
+              {valuta}
+            </span>
+            {latest && (
+              <span className="font-mono text-sm font-bold text-gray-900">
+                {formatNum(latest.curs_unitar, 4)}
+                <span className="ml-1 text-xs font-normal text-gray-400">RON</span>
+              </span>
+            )}
+          </p>
+        </div>
+        <div className="flex overflow-hidden rounded-lg border border-gray-200 text-xs">
+          {CHART_PERIODS.map(p => (
+            <button
+              key={p.days}
+              type="button"
+              onClick={() => setPeriodDays(p.days)}
+              className={`px-2.5 py-1 font-medium transition ${
+                periodDays === p.days ? 'bg-amber-500 text-white' : 'text-gray-500 hover:bg-gray-50'
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {error && (
+        <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+          {error}
+        </div>
+      )}
+
+      {!error && loading && <div className="h-64 animate-pulse rounded-xl bg-gray-100" />}
+
+      {!error && !loading && data.length === 0 && (
+        <p className="py-10 text-center text-sm text-gray-400">Nu există date pentru perioada selectată.</p>
+      )}
+
+      {!error && !loading && data.length > 0 && (
+        <div className="h-64">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="cursGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.25} />
+                  <stop offset="100%" stopColor="#f59e0b" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+              <XAxis
+                dataKey="data"
+                tickFormatter={formatDate}
+                tick={{ fontSize: 11, fill: '#9ca3af' }}
+                axisLine={{ stroke: '#e5e7eb' }}
+                tickLine={false}
+                minTickGap={40}
+              />
+              <YAxis
+                domain={['auto', 'auto']}
+                tick={{ fontSize: 11, fill: '#9ca3af' }}
+                axisLine={false}
+                tickLine={false}
+                width={56}
+                tickFormatter={v => formatNum(v, 2)}
+              />
+              <Tooltip
+                formatter={(value: unknown) => [`${formatNum(Number(Array.isArray(value) ? value[0] : value), 4)} RON`, valuta]}
+                labelFormatter={label => formatDate(label as string)}
+                contentStyle={{ borderRadius: 12, border: '1px solid #f3f4f6', fontSize: 12 }}
+              />
+              <Area
+                type="monotone"
+                dataKey="curs_unitar"
+                stroke="#f59e0b"
+                strokeWidth={2}
+                fill="url(#cursGradient)"
+                dot={false}
+                activeDot={{ r: 4 }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function PrimaryRatesGrid({
   valute,
   loading,
@@ -604,6 +737,7 @@ export function SchimbPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [convertTrigger, setConvertTrigger] = useState<ConvertTrigger>(null)
+  const [chartCurrency, setChartCurrency] = useState('EUR')
 
   const converterRef = useRef<HTMLDivElement>(null)
   const tableRef = useRef<HTMLDivElement>(null)
@@ -682,6 +816,7 @@ export function SchimbPage() {
           valute={allValute}
           trigger={convertTrigger}
           converterRef={converterRef}
+          onFromCurrencyChange={setChartCurrency}
         />
         <PrimaryRatesGrid
           valute={allValute}
@@ -690,6 +825,8 @@ export function SchimbPage() {
           tableRef={tableRef}
         />
       </div>
+
+      <RatesChartSection valuta={chartCurrency} />
 
       {/* Full rates table */}
       <div ref={tableRef}>

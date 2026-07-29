@@ -11,3 +11,8 @@ export interface CursZi {
   multiplicator: number
   curs_unitar: number
 }
+
+export interface CursIstoricPunct {
+  data: string
+  curs_unitar: number
+}
