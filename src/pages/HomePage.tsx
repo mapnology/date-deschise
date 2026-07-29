@@ -14,6 +14,17 @@ function IconCAEN() {
   )
 }
 
+function IconSwap() {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="text-violet-600">
+      <path d="m16 3 4 4-4 4" />
+      <path d="M20 7H4" />
+      <path d="m8 21-4-4 4-4" />
+      <path d="M4 17h16" />
+    </svg>
+  )
+}
+
 function IconMapPin() {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-600">
@@ -125,6 +136,15 @@ const API_SERVICES: ApiService[] = [
     href: '/caen',
     iconBg: 'bg-blue-50',
     icon: <IconCAEN />,
+  },
+  {
+    id: 'conversie-caen',
+    title: 'Conversie CAEN',
+    description: 'Conversie coduri CAEN între Rev. 2 și Rev. 3 și verificarea actualizării firmelor.',
+    status: 'live',
+    href: '/conversie-caen',
+    iconBg: 'bg-violet-50',
+    icon: <IconSwap />,
   },
   {
     id: 'siruta',
