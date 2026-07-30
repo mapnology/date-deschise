@@ -14,5 +14,5 @@ export interface CursZi {
 
 export interface CursIstoricPunct {
   data: string
-  curs_unitar: number
+  curs: number
 }

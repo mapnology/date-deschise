@@ -418,7 +418,7 @@ function RatesChartSection({ valuta }: { valuta: string }) {
             </span>
             {latest && (
               <span className="font-mono text-sm font-bold text-gray-900">
-                {formatNum(latest.curs_unitar, 4)}
+                {formatNum(latest.curs, 4)}
                 <span className="ml-1 text-xs font-normal text-gray-400">RON</span>
               </span>
             )}
@@ -486,7 +486,7 @@ function RatesChartSection({ valuta }: { valuta: string }) {
               />
               <Area
                 type="monotone"
-                dataKey="curs_unitar"
+                dataKey="curs"
                 stroke="#f59e0b"
                 strokeWidth={2}
                 fill="url(#cursGradient)"
