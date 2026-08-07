@@ -7,6 +7,7 @@ const links = [
   { to: '/caen', label: 'CAEN Rev. 3', exact: false },
   { to: '/siruta', label: 'SIRUTA', exact: false },
   { to: '/firme', label: 'Firme', exact: false },
+  { to: '/conversie-caen', label: 'Conversie CAEN v2–v3', exact: false },
   { to: '/schimb', label: 'Curs Valutar', exact: false },
   { to: '/zile-libere', label: 'Zile Libere', exact: false },
   { to: '/documentatie', label: 'Documentație API', exact: false },

@@ -12,6 +12,7 @@ import { AboutPage } from './pages/AboutPage'
 import { FirmePage } from './pages/FirmePage'
 import { FirmaDetailPage } from './pages/FirmaDetailPage'
 import { DateFinanciarePage } from './pages/DateFinanciarePage'
+import { ConversieCAENPage } from './pages/ConversieCAENPage'
 
 const PAGE_TITLES: Record<string, string> = {
   '/': 'Date Deschise',
@@ -21,6 +22,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/zile-libere': 'Zile Libere & Idei de Concediu',
   '/firme': 'Căutare Firme',
   '/date-financiare': 'Date Financiare Firme',
+  '/conversie-caen': 'Conversie CAEN Rev. 2 – Rev. 3',
   '/documentatie': 'Documentație API',
   '/despre': 'Despre proiect',
 }
@@ -50,6 +52,7 @@ export default function App() {
             <Route path="/firme" element={<FirmePage />} />
             <Route path="/firme/:cui" element={<FirmaDetailPage />} />
             <Route path="/date-financiare" element={<DateFinanciarePage />} />
+            <Route path="/conversie-caen" element={<ConversieCAENPage />} />
             <Route path="/documentatie" element={<DocsPage />} />
             <Route path="/despre" element={<AboutPage />} />
           </Routes>

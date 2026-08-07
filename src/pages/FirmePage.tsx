@@ -174,18 +174,19 @@ export function FirmePage() {
   const canSubmit = !loading && query.trim().length >= minLen && (!isCuiMode || /^\d+$/.test(query.trim()))
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-      <div className="mb-8 text-center">
-        <h1 className="mb-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+    <main id="firme-page" className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
+      <div id="firme-header" className="mb-8 text-center">
+        <h1 id="firme-title" className="mb-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
           Căutare Firme
         </h1>
-        <p className="text-gray-500">Caută companii din România după denumire sau CUI</p>
+        <p id="firme-subtitle" className="text-gray-500">Caută companii din România după denumire sau CUI</p>
       </div>
 
       {/* Mode toggle */}
       <div className="mb-6 flex justify-center">
-        <div className="inline-flex rounded-xl border border-gray-200 bg-white p-1 shadow-sm">
+        <div id="firme-mode-toggle" className="inline-flex rounded-xl border border-gray-200 bg-white p-1 shadow-sm">
           <button
+            id="firme-mode-name"
             type="button"
             onClick={() => switchMode('name')}
             className={`rounded-lg px-5 py-2 text-sm font-medium transition ${
@@ -197,6 +198,7 @@ export function FirmePage() {
             Denumire
           </button>
           <button
+            id="firme-mode-cui"
             type="button"
             onClick={() => switchMode('cui')}
             className={`rounded-lg px-5 py-2 text-sm font-medium transition ${
@@ -211,7 +213,7 @@ export function FirmePage() {
       </div>
 
       {/* Search form */}
-      <form onSubmit={handleSearch} className="mb-8 flex justify-center">
+      <form id="firme-search-form" onSubmit={handleSearch} className="mb-8 flex justify-center">
         <div className="flex w-full gap-2">
           <div className="relative flex-1">
             <svg
@@ -230,6 +232,7 @@ export function FirmePage() {
               <path d="m21 21-4.3-4.3" />
             </svg>
             <input
+              id="firme-search-input"
               key={mode}
               type={isCuiMode ? 'number' : 'text'}
               value={query}
@@ -241,6 +244,7 @@ export function FirmePage() {
             />
           </div>
           <button
+            id="firme-search-btn"
             type="submit"
             disabled={!canSubmit}
             className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
@@ -257,18 +261,18 @@ export function FirmePage() {
       </form>
 
       {error && (
-        <div className="mb-6 rounded-xl border border-red-100 bg-red-50 px-5 py-4 text-sm text-red-700">
+        <div id="firme-error" className="mb-6 rounded-xl border border-red-100 bg-red-50 px-5 py-4 text-sm text-red-700">
           {error}
         </div>
       )}
 
       {notFound && (
-        <div className="mb-6 rounded-xl border border-amber-100 bg-amber-50 px-5 py-4 text-sm text-amber-700">
+        <div id="firme-not-found" className="mb-6 rounded-xl border border-amber-100 bg-amber-50 px-5 py-4 text-sm text-amber-700">
           Nicio firmă găsită pentru această căutare.
         </div>
       )}
 
-      {company && <CompanyDetail company={company} />}
+      {company && <div id="firme-result"><CompanyDetail company={company} /></div>}
 
       {!company && !error && !notFound && !loading && (
         <div className="flex flex-col items-center gap-3 py-16 text-center text-gray-400">

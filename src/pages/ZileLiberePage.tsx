@@ -221,6 +221,7 @@ function CalendarTab() {
         </div>
 
         <select
+          id="calendar-luna-select"
           value={luna ?? ''}
           onChange={e => setLuna(e.target.value === '' ? null : parseInt(e.target.value, 10))}
           className="shrink-0 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
@@ -528,7 +529,7 @@ function PuntiTab() {
       </p>
 
       {!loading && !error && punti.length > 0 && (
-        <div className="mb-6 flex flex-wrap items-center gap-2">
+        <div id="punti-filtru" className="mb-6 flex flex-wrap items-center gap-2">
           <span className="text-sm font-medium text-gray-400">Zile concediu (maxim):</span>
           <button
             onClick={() => setFiltruZile(null)}
@@ -575,7 +576,7 @@ function PuntiTab() {
       )}
 
       {!loading && !error && puntiFiltrate.length > 0 && (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div id="punti-results" className="grid gap-4 sm:grid-cols-2">
           {puntiFiltrate.map((p, i) => (
             <PunteCard key={`${p.interval_start}-${i}`} punta={p} />
           ))}
@@ -591,16 +592,17 @@ export function ZileLiberePage() {
   const [tab, setTab] = useState<'calendar' | 'lunar' | 'punti'>('calendar')
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-      <div className="mb-10 text-center">
-        <h1 className="mb-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+    <main id="zile-libere-page" className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
+      <div id="zile-libere-header" className="mb-10 text-center">
+        <h1 id="zile-libere-title" className="mb-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
           Zile Libere & Idei de Concediu
         </h1>
-        <p className="text-gray-500">Calendarul zilelor libere legale din România și sugestii de punți</p>
+        <p id="zile-libere-subtitle" className="text-gray-500">Calendarul zilelor libere legale din România și sugestii de punți</p>
       </div>
 
-      <div className="mb-8 flex rounded-xl border border-gray-100 bg-gray-50 p-1">
+      <div id="zile-libere-tabs" className="mb-8 flex rounded-xl border border-gray-100 bg-gray-50 p-1">
         <button
+          id="tab-calendar"
           onClick={() => setTab('calendar')}
           className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition ${
             tab === 'calendar'
@@ -611,6 +613,7 @@ export function ZileLiberePage() {
           Calendar Sărbători Legale
         </button>
         <button
+          id="tab-lunar"
           onClick={() => setTab('lunar')}
           className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition ${
             tab === 'lunar'
@@ -621,6 +624,7 @@ export function ZileLiberePage() {
           Calendar Vizual
         </button>
         <button
+          id="tab-punti"
           onClick={() => setTab('punti')}
           className={`flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition ${
             tab === 'punti'
@@ -632,13 +636,13 @@ export function ZileLiberePage() {
         </button>
       </div>
 
-      <div className={tab !== 'calendar' ? 'hidden' : ''}>
+      <div id="panel-calendar" className={tab !== 'calendar' ? 'hidden' : ''}>
         <CalendarTab />
       </div>
-      <div className={tab !== 'lunar' ? 'hidden' : ''}>
+      <div id="panel-lunar" className={tab !== 'lunar' ? 'hidden' : ''}>
         <CalendarVizualTab />
       </div>
-      <div className={tab !== 'punti' ? 'hidden' : ''}>
+      <div id="panel-punti" className={tab !== 'punti' ? 'hidden' : ''}>
         <PuntiTab />
       </div>
     </main>

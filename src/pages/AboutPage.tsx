@@ -1,15 +1,15 @@
 export function AboutPage() {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-      <h1 className="mb-2 text-3xl font-bold tracking-tight text-gray-900">
+    <main id="about-page" className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
+      <h1 id="about-title" className="mb-2 text-3xl font-bold tracking-tight text-gray-900">
         Despre proiect
       </h1>
-      <p className="mb-10 text-gray-500">
+      <p id="about-subtitle" className="mb-10 text-gray-500">
         Context despre platformă, sursele de date utilizate, endpoint-urile disponibile și direcțiile de extindere.
       </p>
 
       <div className="space-y-10">
-        <section className="rounded-2xl border border-gray-100 bg-white p-7 shadow-sm">
+        <section id="about-ce-este" className="rounded-2xl border border-gray-100 bg-white p-7 shadow-sm">
           <h2 className="mb-3 text-lg font-bold text-gray-900">Ce este Date Deschise România</h2>
           <p className="leading-relaxed text-gray-600">
             Date Deschise România este interfața web publică pentru API-ul{' '}
@@ -35,7 +35,7 @@ export function AboutPage() {
           </p>
         </section>
 
-        <section className="rounded-2xl border border-gray-100 bg-white p-7 shadow-sm">
+        <section id="about-disponibil" className="rounded-2xl border border-gray-100 bg-white p-7 shadow-sm">
           <h2 className="mb-3 text-lg font-bold text-gray-900">Ce este disponibil acum</h2>
           <ul className="space-y-3 text-gray-600">
             <li className="flex items-start gap-2">
@@ -53,7 +53,28 @@ export function AboutPage() {
             <li className="flex items-start gap-2">
               <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
               <span>
-                <strong className="text-gray-800">Curs valutar BNR</strong> pentru cursurile oficiale publicate zilnic față de RON.
+                <strong className="text-gray-800">Curs valutar BNR</strong> pentru cursurile oficiale publicate zilnic față de RON, cu istoric al cursurilor
+                și convertor valutar cu TVA inclus.
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-purple-500" />
+              <span>
+                <strong className="text-gray-800">Căutare firme</strong> după CUI sau denumire, cu detalii despre fiecare companie și date financiare
+                (cifră de afaceri, profit, angajați) preluate din bilanțurile depuse.
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-rose-500" />
+              <span>
+                <strong className="text-gray-800">Conversie CAEN Rev. 2 ↔ Rev. 3</strong> pentru corespondența dintre codurile din cele două clasificări.
+              </span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-teal-500" />
+              <span>
+                <strong className="text-gray-800">Zile libere legale</strong> din România, cu sugestii de punți și posibilitatea de a adăuga zilele
+                direct în Google Calendar.
               </span>
             </li>
           </ul>
@@ -63,7 +84,7 @@ export function AboutPage() {
           </p>
         </section>
 
-        <section className="rounded-2xl border border-gray-100 bg-white p-7 shadow-sm">
+        <section id="about-surse" className="rounded-2xl border border-gray-100 bg-white p-7 shadow-sm">
           <h2 className="mb-3 text-lg font-bold text-gray-900">Surse de date și acuratețe</h2>
           <p className="mb-4 leading-relaxed text-gray-600">
             Datele utilizate în platformă provin din surse oficiale românești și sunt transformate într-un format API consistent.
@@ -81,7 +102,7 @@ export function AboutPage() {
               <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
               <span>
                 <strong className="text-gray-800">ONRC</strong> – Oficiul Național al
-                Registrului Comerțului, pentru context operațional legat de utilizarea codurilor CAEN.
+                Registrului Comerțului, pentru context operațional legat de utilizarea codurilor CAEN, căutarea firmelor și datele lor financiare.
               </span>
             </li>
             <li className="flex items-start gap-2">
@@ -102,7 +123,7 @@ export function AboutPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-gray-100 bg-white p-7 shadow-sm">
+        <section id="about-opensource" className="rounded-2xl border border-gray-100 bg-white p-7 shadow-sm">
           <h2 className="mb-3 text-lg font-bold text-gray-900">Open-source și integrare</h2>
           <p className="mb-4 leading-relaxed text-gray-600">
             Frontend-ul acestui portal este open-source, iar documentația API este disponibilă public atât în site, cât și în Swagger UI.
@@ -134,7 +155,7 @@ export function AboutPage() {
           </ul>
         </section>
 
-        <section className="rounded-2xl border border-gray-100 bg-white p-7 shadow-sm">
+        <section id="about-contact" className="rounded-2xl border border-gray-100 bg-white p-7 shadow-sm">
           <h2 className="mb-3 text-lg font-bold text-gray-900">Contact</h2>
           <p className="mb-4 leading-relaxed text-gray-600">
             Pentru întrebări, sugestii, parteneriate sau propuneri de noi seturi de date, ne poți contacta la:

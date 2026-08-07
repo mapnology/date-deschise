@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
-import { getValute, getValuteByData } from '../services/schimbApi'
-import type { ValutaInfo } from '../types/schimb'
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { getValute, getValuteByData, getIstoricCurs } from '../services/schimbApi'
+import type { ValutaInfo, CursIstoricPunct } from '../types/schimb'
 
 const PRIMARY_CURRENCIES = ['EUR', 'USD', 'GBP', 'CHF', 'CAD', 'AUD', 'JPY', 'HUF', 'BGN', 'MDL']
 
 const TVA_PRESETS: { label: string; value: number }[] = [
   { label: '0%', value: 0 },
-  { label: '11', value: 11 },
+  { label: '11%', value: 11 },
   { label: '21%', value: 21 },
 ]
 
@@ -76,6 +77,12 @@ function localToday(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
+function dateNDaysAgo(n: number): string {
+  const d = new Date()
+  d.setDate(d.getDate() - n)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 function formatDate(dateStr: string | undefined | null): string {
   if (!dateStr) return ''
   const [y, m, d] = dateStr.split('-')
@@ -102,10 +109,12 @@ function ConvertorCard({
   valute,
   trigger,
   converterRef,
+  onFromCurrencyChange,
 }: {
   valute: ValutaInfo[]
   trigger: ConvertTrigger
   converterRef: React.RefObject<HTMLDivElement | null>
+  onFromCurrencyChange: (currency: string) => void
 }) {
   const [amount, setAmount] = useState('100')
   const [fromCurrency, setFromCurrency] = useState('EUR')
@@ -122,6 +131,10 @@ function ConvertorCard({
       setToCurrency('RON')
     }
   }, [trigger])
+
+  useEffect(() => {
+    onFromCurrencyChange(fromCurrency)
+  }, [fromCurrency, onFromCurrencyChange])
 
   const allOptions = [{ valuta: 'RON', curs_unitar: 1, ultima_data: '' } as ValutaInfo, ...valute]
 
@@ -166,9 +179,9 @@ function ConvertorCard({
   const fmt = (n: number) => formatNum(n, decimals)
 
   return (
-    <div ref={converterRef} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+    <div id="convertor-card" ref={converterRef} className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
       <div className="mb-5 flex items-center justify-between">
-        <h2 className="text-base font-semibold text-gray-800">Convertor valutar + TVA</h2>
+        <h2 id="convertor-title" className="text-base font-semibold text-gray-800">Convertor valutar + TVA</h2>
         <div className="flex overflow-hidden rounded-lg border border-gray-200 text-xs">
           {([2, 4, 8] as const).map(d => (
             <button
@@ -190,6 +203,7 @@ function ConvertorCard({
         <div className="flex-1">
           <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">Sumă</label>
           <input
+            id="convertor-amount"
             type="text"
             inputMode="decimal"
             value={amount}
@@ -201,6 +215,7 @@ function ConvertorCard({
         <div className="flex-1">
           <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">Din</label>
           <select
+            id="convertor-from"
             value={fromCurrency}
             onChange={e => setFromCurrency(e.target.value)}
             className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
@@ -213,6 +228,7 @@ function ConvertorCard({
           </select>
         </div>
         <button
+          id="convertor-swap"
           type="button"
           onClick={swap}
           title="Inversează valutele"
@@ -223,6 +239,7 @@ function ConvertorCard({
         <div className="flex-1">
           <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">În</label>
           <select
+            id="convertor-to"
             value={toCurrency}
             onChange={e => setToCurrency(e.target.value)}
             className="w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-900 outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
@@ -237,7 +254,7 @@ function ConvertorCard({
       </div>
 
       {/* TVA row */}
-      <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end">
+      <div id="convertor-tva" className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="flex-1">
           <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-gray-400">Cotă TVA</label>
           <div className="flex flex-wrap items-center gap-1.5">
@@ -305,7 +322,7 @@ function ConvertorCard({
 
       {/* Results */}
       {convertedAmount !== null && (
-        <div className="mt-5 space-y-3 rounded-xl bg-amber-50 p-4">
+        <div id="convertor-result" className="mt-5 space-y-3 rounded-xl bg-amber-50 p-4">
           <div>
             <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-amber-600">Conversie</p>
             <p className="text-lg font-bold text-gray-900">
@@ -364,6 +381,126 @@ function ConvertorCard({
   )
 }
 
+const CHART_PERIODS: { label: string; days: number }[] = [
+  { label: '7 zile', days: 7 },
+  { label: '30 zile', days: 30 },
+  { label: '90 zile', days: 90 },
+  { label: '1 an', days: 365 },
+]
+
+function RatesChartSection({ valuta }: { valuta: string }) {
+  const [periodDays, setPeriodDays] = useState(7)
+  const [data, setData] = useState<CursIstoricPunct[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setLoading(true)
+    setError(null)
+    getIstoricCurs(valuta, dateNDaysAgo(periodDays), localToday())
+      .then(d => { setData(d); setLoading(false) })
+      .catch(() => { setError('Nu s-a putut încărca evoluția cursului.'); setLoading(false) })
+  }, [valuta, periodDays])
+
+  const latest = data[data.length - 1]
+
+  return (
+    <div id="rates-chart" className="mb-10 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400">Evoluție curs</h2>
+          <p className="mt-1 flex items-baseline gap-2">
+            <span
+              title={CURRENCY_NAMES[valuta]}
+              className="cursor-help rounded-md bg-amber-50 px-2 py-0.5 font-mono text-xs font-bold text-amber-700"
+            >
+              {valuta}
+            </span>
+            {latest && (
+              <span className="font-mono text-sm font-bold text-gray-900">
+                {formatNum(latest.curs, 4)}
+                <span className="ml-1 text-xs font-normal text-gray-400">RON</span>
+              </span>
+            )}
+          </p>
+        </div>
+        <div className="flex overflow-hidden rounded-lg border border-gray-200 text-xs">
+          {CHART_PERIODS.map(p => (
+            <button
+              key={p.days}
+              type="button"
+              onClick={() => setPeriodDays(p.days)}
+              className={`px-2.5 py-1 font-medium transition ${
+                periodDays === p.days ? 'bg-amber-500 text-white' : 'text-gray-500 hover:bg-gray-50'
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {error && (
+        <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+          {error}
+        </div>
+      )}
+
+      {!error && loading && <div className="h-64 animate-pulse rounded-xl bg-gray-100" />}
+
+      {!error && !loading && data.length === 0 && (
+        <p className="py-10 text-center text-sm text-gray-400">Nu există date pentru perioada selectată.</p>
+      )}
+
+      {!error && !loading && data.length > 0 && (
+        <div className="h-64">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="cursGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.25} />
+                  <stop offset="100%" stopColor="#f59e0b" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" vertical={false} />
+              <XAxis
+                dataKey="data"
+                tickFormatter={formatDate}
+                tick={{ fontSize: 11, fill: '#9ca3af' }}
+                axisLine={{ stroke: '#e5e7eb' }}
+                tickLine={false}
+                minTickGap={40}
+              />
+              <YAxis
+                domain={['auto', 'auto']}
+                tick={{ fontSize: 11, fill: '#9ca3af' }}
+                axisLine={false}
+                tickLine={false}
+                width={56}
+                tickFormatter={v => formatNum(v, 2)}
+              />
+              <Tooltip
+                formatter={(value: unknown) => [`${formatNum(Number(Array.isArray(value) ? value[0] : value), 4)} RON`, valuta]}
+                labelFormatter={label => formatDate(label as string)}
+                contentStyle={{ borderRadius: 12, border: '1px solid #f3f4f6', fontSize: 12 }}
+              />
+              <Area
+                type="monotone"
+                dataKey="curs"
+                stroke="#f59e0b"
+                strokeWidth={2}
+                fill="url(#cursGradient)"
+                dot={false}
+                activeDot={{ r: 4 }}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function PrimaryRatesGrid({
   valute,
   loading,
@@ -380,7 +517,7 @@ function PrimaryRatesGrid({
     .filter((v): v is ValutaInfo => v !== undefined)
 
   return (
-    <div>
+    <div id="rates-grid">
       <h2 className="mb-4 text-xs font-semibold uppercase tracking-wider text-gray-400">Cursuri principale</h2>
       {loading ? (
         <div className="grid grid-cols-2 gap-2.5">
@@ -479,11 +616,12 @@ function FullRatesTable({
     })
 
   return (
-    <div>
+    <div id="rates-table">
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400">Toate valutele</h2>
         <div className="flex flex-wrap gap-2">
           <input
+            id="rates-search"
             type="text"
             value={search}
             onChange={e => setSearch(e.target.value)}
@@ -491,6 +629,7 @@ function FullRatesTable({
             className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
           />
           <select
+            id="rates-region"
             value={region}
             onChange={e => setRegion(e.target.value)}
             className="rounded-xl border border-gray-200 bg-gray-50 px-3 py-2 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
@@ -598,6 +737,7 @@ export function SchimbPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [convertTrigger, setConvertTrigger] = useState<ConvertTrigger>(null)
+  const [chartCurrency, setChartCurrency] = useState('EUR')
 
   const converterRef = useRef<HTMLDivElement>(null)
   const tableRef = useRef<HTMLDivElement>(null)
@@ -625,14 +765,14 @@ export function SchimbPage() {
   const lastUpdate = allValute[0]?.ultima_data
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+    <main id="schimb-page" className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       {/* Header */}
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div id="schimb-header" className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+          <h1 id="schimb-title" className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
             Curs valutar BNR și convertor TVA
           </h1>
-          <p className="mt-1.5 text-gray-500">
+          <p id="schimb-subtitle" className="mt-1.5 text-gray-500">
             Cursuri oficiale BNR pentru {formatDate(selectedDate) || selectedDate}.
             Conversie valutară și calcul TVA într-un singur formular.
           </p>
@@ -640,6 +780,7 @@ export function SchimbPage() {
         <div className="flex flex-col gap-2 sm:shrink-0 sm:items-end">
           <div className="flex gap-2">
             <input
+              id="schimb-date"
               type="date"
               value={selectedDate}
               max={localToday()}
@@ -647,6 +788,7 @@ export function SchimbPage() {
               className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
             />
             <button
+              id="schimb-refresh"
               type="button"
               onClick={handleRefresh}
               disabled={loading}
@@ -663,17 +805,18 @@ export function SchimbPage() {
 
       {/* Error */}
       {error && (
-        <div className="mb-6 rounded-xl border border-red-100 bg-red-50 px-6 py-4 text-sm font-medium text-red-600">
+        <div id="schimb-error" className="mb-6 rounded-xl border border-red-100 bg-red-50 px-6 py-4 text-sm font-medium text-red-600">
           {error}
         </div>
       )}
 
       {/* Main 2-col layout */}
-      <div className="mb-10 grid gap-6 lg:grid-cols-[1fr_300px]">
+      <div id="schimb-layout" className="mb-10 grid gap-6 lg:grid-cols-[1fr_300px]">
         <ConvertorCard
           valute={allValute}
           trigger={convertTrigger}
           converterRef={converterRef}
+          onFromCurrencyChange={setChartCurrency}
         />
         <PrimaryRatesGrid
           valute={allValute}
@@ -682,6 +825,8 @@ export function SchimbPage() {
           tableRef={tableRef}
         />
       </div>
+
+      <RatesChartSection valuta={chartCurrency} />
 
       {/* Full rates table */}
       <div ref={tableRef}>
